@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cachorradas Estúdios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="imgs/cachorradas-logo-removebg.png">
+<meta name="description" content="Cachorradas Estúdios — conteúdo original, intenso e sem filtro toda semana. Canal oficial no YouTube.">
+<meta property="og:title" content="Cachorradas Estúdios">
+<meta property="og:description" content="Conteúdo original, intenso e sem filtro toda semana.">
+<meta property="og:image" content="imgs/Cachorradas BG.jpeg">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    --blue:    #1E9FE8;
+    --magenta: #D81FBF;
+    --black:   #0A0A0A;
+    --black2:  #111111;
+    --black3:  #181818;
+    --white:   #F0F0F0;
+    --dim:     rgba(255,255,255,0.55);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--black); font-family:'Barlow',sans-serif; color:var(--white); overflow-x:hidden; width:100%; }
+  img { max-width:100%; display:block; }
+
+  /* GRID BG */
+  .grid-bg {
+    position:absolute; inset:0; pointer-events:none; z-index:1;
+    background-image:
+      linear-gradient(rgba(30,159,232,0.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(30,159,232,0.05) 1px,transparent 1px);
+    background-size:50px 50px;
+  }
+
+  /* ══ HERO VIDEO BG ══ */
+  .hero-video-bg {
+    position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+  }
+  .hero-video-bg video {
+    width:100%; height:100%; object-fit:cover; opacity:0.28;
+  }
+  .hero-video-bg::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(160deg,rgba(10,10,10,0.45) 0%,rgba(10,10,10,0.72) 60%,rgba(10,10,10,0.92) 100%);
+  }
+
+  /* ══ SCANLINE ══ */
+  .hero-scanline {
+    position:absolute; left:0; right:0; height:2px; z-index:3; pointer-events:none;
+    background:linear-gradient(90deg,transparent 0%,rgba(30,159,232,0.9) 35%,rgba(216,31,191,0.9) 65%,transparent 100%);
+    animation:scanline 12s linear infinite; opacity:0;
+  }
+  @keyframes scanline {
+    0%   { top:0%;   opacity:0; }
+    4%   { opacity:0.55; }
+    96%  { opacity:0.55; }
+    100% { top:100%; opacity:0; }
+  }
+
+  /* ══ GLITCH no H1 ══ */
+  @keyframes glitch {
+    0%,86%,100% { transform:none; filter:none; }
+    87%  { transform:skewX(-3deg) translateX(-5px); filter:hue-rotate(25deg); }
+    88%  { transform:skewX(2deg)  translateX(4px);  filter:hue-rotate(-15deg); }
+    89%  { transform:none; filter:none; }
+    92%  { transform:skewX(-1deg) translateX(-2px); }
+    93%  { transform:none; }
+  }
+  .hero-h1 { animation:glitch 8s ease-in-out infinite; }
+
+  /* ══ SHINE nos botões ══ */
+  .btn-primary, .btn-outline, .cta-btn, .nav-cta-desktop { position:relative; overflow:hidden; }
+  .btn-primary::after, .cta-btn::after, .nav-cta-desktop::after {
+    content:''; position:absolute; top:0; left:-80%; width:50%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);
+    transform:skewX(-20deg); pointer-events:none;
+  }
+  .btn-primary:hover::after, .cta-btn:hover::after, .nav-cta-desktop:hover::after {
+    left:150%; transition:left 0.5s ease;
+  }
+
+  /* ══ ENERGY FLOW na section-rule ══ */
+  .section-rule { position:relative; overflow:hidden; }
+  .section-rule::after {
+    content:''; position:absolute; top:0; left:-40%; width:35%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.95),transparent);
+    animation:energy-flow 3.5s ease-in-out infinite;
+  }
+  @keyframes energy-flow {
+    0%   { left:-40%; opacity:0; }
+    8%   { opacity:1; }
+    92%  { opacity:1; }
+    100% { left:140%; opacity:0; }
+  }
+
+  /* ══ NEON FLICKER nos números ══ */
+  @keyframes neon-flicker {
+    0%,89%,100% { opacity:1; }
+    90% { opacity:0.35; }
+    91% { opacity:1; }
+    93% { opacity:0.55; }
+    94% { opacity:1; }
+  }
+  .stat-num.blue    { animation:neon-flicker 7s ease-in-out infinite; }
+  .stat-num.magenta { animation:neon-flicker 7s ease-in-out infinite 3s; }
+
+  /* ══ CARD hover glow intensificado ══ */
+  .vcard { transition:background .3s, box-shadow .3s, transform .25s; }
+  .vcard:hover { background:#1c1c1c; transform:translateY(-3px); }
+  .t-blue:hover  { box-shadow:0 6px 32px rgba(30,159,232,0.22); }
+  .t-mag:hover   { box-shadow:0 6px 32px rgba(216,31,191,0.22); }
+  .t-mix:hover   { box-shadow:0 6px 32px rgba(100,80,220,0.22); }
+  .t-dark:hover  { box-shadow:0 6px 32px rgba(30,159,232,0.15); }
+  .t-dark2:hover { box-shadow:0 6px 32px rgba(216,31,191,0.15); }
+
+  /* play btn spark no hover */
+  .play-btn span { transition:box-shadow .25s, transform .25s; }
+  .vcard:hover .play-btn span {
+    box-shadow:0 0 40px rgba(30,159,232,0.9), 0 0 80px rgba(216,31,191,0.5);
+    transform:scale(1.12);
+  }
+
+  /* ══ BORDER PULSE nas seções ══ */
+  @keyframes border-glow {
+    0%,100% { box-shadow:0 0 8px rgba(30,159,232,0.08); }
+    50%      { box-shadow:0 0 18px rgba(30,159,232,0.22); }
+  }
+  .stats-bar { animation:border-glow 5s ease-in-out infinite; }
+
+  /* ══ TICKER dot com brilho ══ */
+  .ticker-inner .dot { color:var(--blue); text-shadow:0 0 8px var(--blue); animation:neon-flicker 5s ease-in-out infinite; }
+
+  /* ══ NAV ══ */
+  nav {
+    position:sticky; top:0; z-index:200;
+    background:rgba(10,10,10,0.95);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(30,159,232,0.25);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 1.2rem; height:60px;
+  }
+  .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+  .nav-logo img { height:36px; width:auto; flex-shrink:0; object-fit:contain; }
+  .nav-links { display:none; }
+  .nav-cta-desktop { display:none; }
+  .nav-menu-btn {
+    display:flex; flex-direction:column; gap:5px;
+    background:none; border:none; cursor:pointer; padding:6px;
+  }
+  .nav-menu-btn span { display:block; width:24px; height:2px; background:var(--white); border-radius:2px; transition:background .2s; }
+  .nav-menu-btn:hover span { background:var(--blue); }
+
+  /* Mobile drawer */
+  .nav-drawer {
+    display:none; position:fixed; top:60px; left:0; right:0; bottom:0;
+    background:rgba(10,10,10,0.98); backdrop-filter:blur(20px);
+    z-index:199; flex-direction:column; padding:2rem 1.5rem;
+    border-top:1px solid rgba(30,159,232,0.2);
+  }
+  .nav-drawer.open { display:flex; }
+  .nav-drawer a {
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1.8rem;
+    letter-spacing:3px; text-transform:uppercase; color:var(--white); text-decoration:none;
+    padding:1rem 0; border-bottom:1px solid rgba(255,255,255,0.07); transition:color .2s;
+  }
+  .nav-drawer a:hover { color:var(--blue); }
+  .nav-drawer .drawer-cta {
+    margin-top:2rem; background:linear-gradient(135deg,var(--magenta),#A0189A); color:#fff;
+    text-align:center; border:none; font-size:1.2rem; letter-spacing:4px;
+  }
+
+  /* ══ HERO ══ */
+  /* No mobile: logo desktop col escondido */
+  #heroLogoDesktop { display:none; }
+  .hero {
+    position:relative; overflow:hidden;
+    padding:3rem 1.5rem 4rem;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    min-height:100svh; justify-content:center; gap:0;
+  }
+  .orb { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; }
+  .orb-m { width:350px; height:350px; background:rgba(216,31,191,0.18); top:-80px; left:-100px; }
+  .orb-b { width:300px; height:300px; background:rgba(30,159,232,0.14); bottom:-60px; right:-80px; }
+
+  .hero-eyebrow {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin-bottom:1.5rem; position:relative; z-index:2;
+  }
+  .eyebrow-line { width:28px; height:2px; background:linear-gradient(to right,var(--magenta),var(--blue)); }
+  .hero-eyebrow span { font-size:0.62rem; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:var(--blue); }
+
+  /* Logo ring widget */
+  .hero-logo-wrap {
+    position:relative; z-index:2; width:150px; height:150px;
+    margin:0 auto 2rem; display:flex; align-items:center; justify-content:center;
+  }
+  .hero-logo-wrap img {
+    width:100%; height:100%; object-fit:contain;
+    filter:drop-shadow(0 0 18px rgba(30,159,232,0.6)) drop-shadow(0 0 36px rgba(216,31,191,0.35));
+    animation:glow-pulse 3s ease-in-out infinite; position:relative; z-index:2;
+  }
+  .hero-ring {
+    position:absolute; border-radius:50%; border:1px solid transparent;
+    animation:spin 20s linear infinite;
+  }
+  .hr1 { width:150px; height:150px; border-color:rgba(30,159,232,0.3); animation-duration:25s; }
+  .hr2 { width:185px; height:185px; border-color:rgba(216,31,191,0.25); animation-duration:18s; animation-direction:reverse; }
+  .hr1::before,.hr2::before { content:''; position:absolute; width:7px; height:7px; border-radius:50%; top:50%; left:-4px; transform:translateY(-50%); }
+  .hr1::before { background:var(--blue); box-shadow:0 0 10px var(--blue); }
+  .hr2::before { background:var(--magenta); box-shadow:0 0 10px var(--magenta); }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+  @keyframes glow-pulse {
+    0%,100%{ filter:drop-shadow(0 0 18px rgba(30,159,232,.6)) drop-shadow(0 0 36px rgba(216,31,191,.3)); }
+    50%    { filter:drop-shadow(0 0 32px rgba(30,159,232,.9)) drop-shadow(0 0 60px rgba(216,31,191,.5)); }
+  }
+
+  .hero-h1 {
+    position:relative; z-index:2;
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic;
+    text-transform:uppercase; line-height:.9;
+    font-size:clamp(3.2rem,16vw,6rem); margin-bottom:1.4rem;
+  }
+  .h1-blue    { display:block; color:var(--blue);    text-shadow:0 0 28px rgba(30,159,232,.6); }
+  .h1-magenta { display:block; color:var(--magenta); text-shadow:0 0 28px rgba(216,31,191,.6); }
+
+  .hero-desc {
+    position:relative; z-index:2; font-size:.95rem; font-weight:300; color:var(--dim);
+    line-height:1.75; margin-bottom:2.2rem; max-width:380px;
+  }
+  .hero-desc strong { color:var(--white); font-weight:700; }
+
+  .hero-btns {
+    position:relative; z-index:2; display:flex; flex-direction:column; gap:.8rem;
+    width:100%; max-width:300px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:linear-gradient(135deg,var(--blue),#1270A8); color:#fff;
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1rem;
+    letter-spacing:3px; text-transform:uppercase; padding:14px 28px; text-decoration:none;
+    clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+    box-shadow:0 0 22px rgba(30,159,232,.4); transition:all .2s;
+  }
+  .btn-primary:hover { box-shadow:0 0 46px rgba(30,159,232,.75); filter:brightness(1.1); }
+  .btn-outline {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:transparent; color:var(--magenta);
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1rem;
+    letter-spacing:3px; text-transform:uppercase; padding:13px 28px; border:1px solid var(--magenta);
+    text-decoration:none;
+    clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+    box-shadow:0 0 12px rgba(216,31,191,.2); transition:all .2s;
+  }
+  .btn-outline:hover { box-shadow:0 0 32px rgba(216,31,191,.5); }
+
+  /* ══ STATS ══ */
+  .stats-bar {
+    background:var(--black2);
+    border-top:1px solid rgba(30,159,232,.2);
+    border-bottom:1px solid rgba(30,159,232,.2);
+    display:grid; grid-template-columns:1fr 1fr;
+  }
+  .stat-cell {
+    padding:1.5rem 1rem; text-align:center;
+    border-right:1px solid rgba(255,255,255,.06);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .stat-cell:nth-child(2n) { border-right:none; }
+  .stat-cell:nth-child(3),.stat-cell:nth-child(4) { border-bottom:none; }
+  .stat-num {
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:2rem; line-height:1;
+    display:block; margin-bottom:.3rem;
+  }
+  .stat-num.blue    { color:var(--blue);    text-shadow:0 0 16px rgba(30,159,232,.5); }
+  .stat-num.magenta { color:var(--magenta); text-shadow:0 0 16px rgba(216,31,191,.5); }
+  .stat-label { font-size:.6rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,.35); }
+
+  /* ══ VIDEOS ══ */
+  .section-videos { padding:2.5rem 1.2rem; background:var(--black2); }
+  .section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; gap:.8rem; }
+  .section-label {
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic;
+    font-size:1.6rem; text-transform:uppercase; color:var(--white); white-space:nowrap; flex-shrink:0;
+  }
+  .section-label span { color:var(--blue); }
+  .section-rule { flex:1; height:1px; background:linear-gradient(to right,var(--blue),transparent); box-shadow:0 0 6px var(--blue); }
+  .section-view-all {
+    font-size:.62rem; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    color:var(--magenta); text-decoration:none; border-bottom:1px solid var(--magenta);
+    padding-bottom:2px; white-space:nowrap; flex-shrink:0;
+  }
+
+  /* Stacked on mobile */
+  .videos-grid { display:flex; flex-direction:column; gap:2px; background:rgba(30,159,232,.12); border:1px solid rgba(30,159,232,.15); }
+
+  .vcard { background:var(--black3); overflow:hidden; cursor:pointer; transition:background .3s; display:flex; flex-direction:column; text-decoration:none; color:inherit; }
+  .vcard:hover { background:#1a1a1a; }
+  .vcard-thumb {
+    display:flex; align-items:center; justify-content:center;
+    font-size:3.5rem; height:170px; position:relative; overflow:hidden; flex-shrink:0;
+  }
+  .vcard-thumb img {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+  }
+  .vcard.featured .vcard-thumb { height:200px; font-size:4rem; }
+  .vcard-thumb > span { position:relative; z-index:1; }
+  .t-blue  .vcard-thumb { background:linear-gradient(135deg,#051525,#0d3a5e); }
+  .t-mag   .vcard-thumb { background:linear-gradient(135deg,#150012,#3d0035); }
+  .t-mix   .vcard-thumb { background:linear-gradient(135deg,#100020,#0d3050); }
+  .t-dark  .vcard-thumb { background:#0f0f0f; }
+  .t-dark2 .vcard-thumb { background:#0d0d1a; }
+
+  .play-btn {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    opacity:0; background:rgba(0,0,0,.5); transition:opacity .25s; z-index:2;
+  }
+  .vcard:hover .play-btn { opacity:1; }
+  .play-btn span {
+    width:48px; height:48px; border-radius:50%;
+    background:linear-gradient(135deg,var(--blue),var(--magenta));
+    display:flex; align-items:center; justify-content:center; font-size:1rem; color:#fff;
+    box-shadow:0 0 25px rgba(30,159,232,.6);
+  }
+  .vcard-badge {
+    position:absolute; top:10px; left:10px; z-index:3;
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:.58rem;
+    letter-spacing:3px; text-transform:uppercase; padding:5px 10px;
+  }
+  .badge-new  { background:var(--blue);    color:#000; }
+  .badge-hot  { background:var(--magenta); color:#fff; }
+  .badge-fire { background:linear-gradient(135deg,var(--blue),var(--magenta)); color:#fff; }
+
+  .vcard-info { padding:1.1rem 1.3rem; }
+  .vcard-cat { font-size:.58rem; font-weight:700; letter-spacing:4px; text-transform:uppercase; margin-bottom:.4rem; display:block; }
+  .cat-blue { color:var(--blue); }
+  .cat-mag  { color:var(--magenta); }
+  .vcard-title {
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; color:var(--white);
+    margin-bottom:.4rem; line-height:1.2; font-size:1.05rem;
+  }
+  .vcard.featured .vcard-title { font-size:1.35rem; font-style:italic; }
+  .vcard-meta { font-size:.7rem; color:rgba(255,255,255,.35); }
+
+  /* ══ TICKER ══ */
+  .ticker-bar {
+    background:var(--black2); padding:1.1rem 0; overflow:hidden; position:relative;
+    border-top:1px solid rgba(216,31,191,.2); border-bottom:1px solid rgba(216,31,191,.2);
+  }
+  .ticker-bar::before,.ticker-bar::after { content:''; position:absolute; top:0; bottom:0; width:40px; z-index:2; pointer-events:none; }
+  .ticker-bar::before { left:0;  background:linear-gradient(to right,var(--black2),transparent); }
+  .ticker-bar::after  { right:0; background:linear-gradient(to left,var(--black2),transparent); }
+  .ticker-inner {
+    display:flex; gap:2rem; white-space:nowrap; animation:marquee 28s linear infinite;
+    font-size:.68rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,.3);
+  }
+  .ticker-inner span { flex-shrink:0; }
+  .ticker-inner .dot { color:var(--blue); }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ══ ABOUT ══ */
+  .section-about { background:var(--black); padding:3rem 1.5rem; }
+  .about-logo-mobile {
+    width:160px; height:160px; margin:0 auto 2.2rem;
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .about-logo-mobile img {
+    width:100%; height:100%; object-fit:contain;
+    filter:drop-shadow(0 0 24px rgba(30,159,232,.5)) drop-shadow(0 0 48px rgba(216,31,191,.3));
+    animation:float 5s ease-in-out infinite; position:relative; z-index:1;
+  }
+  .about-logo-mobile::before {
+    content:''; position:absolute; inset:-18px; border:1px solid rgba(30,159,232,.22); border-radius:50%;
+    animation:spin 14s linear infinite;
+  }
+  .about-logo-mobile::after {
+    content:''; position:absolute; inset:-36px; border:1px solid rgba(216,31,191,.16); border-radius:50%;
+    animation:spin 20s linear infinite reverse;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+  .about-eyebrow {
+    font-size:.62rem; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+    color:var(--magenta); margin-bottom:1rem; display:flex; align-items:center; gap:10px;
+  }
+  .about-eyebrow::before { content:''; width:18px; height:1px; background:var(--magenta); box-shadow:0 0 5px var(--magenta); flex-shrink:0; }
+  .about-h2 {
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic;
+    text-transform:uppercase; line-height:.95; font-size:clamp(2.5rem,12vw,4.5rem); margin-bottom:1.6rem;
+  }
+  .line-blue    { display:block; color:var(--blue);    text-shadow:0 0 26px rgba(30,159,232,.5); }
+  .line-magenta { display:block; color:var(--magenta); text-shadow:0 0 26px rgba(216,31,191,.5); }
+  .about-p { font-size:.95rem; font-weight:300; color:var(--dim); line-height:1.8; margin-bottom:.9rem; }
+  .about-p strong { color:var(--white); font-weight:700; }
+
+  /* ══ CTA ══ */
+  .section-cta { position:relative; padding:4.5rem 1.5rem; text-align:center; overflow:hidden; background:var(--black); }
+  .cta-orb-l { position:absolute; width:350px; height:350px; border-radius:50%; background:rgba(216,31,191,.12); filter:blur(80px); top:-80px; left:-120px; pointer-events:none; }
+  .cta-orb-r { position:absolute; width:300px; height:300px; border-radius:50%; background:rgba(30,159,232,.12); filter:blur(80px); bottom:-70px; right:-100px; pointer-events:none; }
+  .cta-content { position:relative; z-index:2; }
+  .cta-eyebrow {
+    font-size:.62rem; font-weight:700; letter-spacing:5px; text-transform:uppercase; color:var(--blue);
+    margin-bottom:1.2rem; display:flex; align-items:center; justify-content:center; gap:14px;
+  }
+  .cta-eyebrow::before,.cta-eyebrow::after { content:''; width:36px; height:1px; background:var(--blue); box-shadow:0 0 6px var(--blue); }
+  .cta-h2 {
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic;
+    text-transform:uppercase; line-height:.9; font-size:clamp(3.2rem,16vw,6rem); margin-bottom:1.4rem;
+  }
+  .cta-h2 .l1 { display:block; color:var(--blue);    text-shadow:0 0 36px rgba(30,159,232,.6); }
+  .cta-h2 .l2 { display:block; color:var(--magenta); text-shadow:0 0 36px rgba(216,31,191,.6); }
+  .cta-sub { font-size:.95rem; font-weight:300; color:var(--dim); margin:0 auto 2.2rem; max-width:380px; line-height:1.8; }
+  .cta-btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    background:linear-gradient(135deg,var(--magenta),var(--blue)); color:#fff;
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.05rem;
+    letter-spacing:4px; text-transform:uppercase; padding:15px 36px; text-decoration:none;
+    clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);
+    box-shadow:0 0 36px rgba(216,31,191,.45); transition:all .25s; width:100%; max-width:320px;
+  }
+  .cta-btn:hover { box-shadow:0 0 65px rgba(216,31,191,.75); filter:brightness(1.1); }
+
+  /* ══ FOOTER ══ */
+  footer {
+    background:var(--black2); border-top:1px solid rgba(30,159,232,.15);
+    padding:2rem 1.5rem; display:flex; flex-direction:column; align-items:center; gap:1.2rem; text-align:center;
+  }
+  .footer-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  footer p { font-size:.7rem; color:rgba(255,255,255,.22); letter-spacing:1px; }
+  .footer-socials { display:flex; gap:.7rem; }
+  .footer-socials a {
+    width:40px; height:40px; border:1px solid rgba(30,159,232,.25);
+    display:flex; align-items:center; justify-content:center; font-size:.9rem; text-decoration:none; color:var(--dim); transition:all .2s;
+  }
+  .footer-socials a:hover { border-color:var(--blue); color:var(--blue); box-shadow:0 0 12px rgba(30,159,232,.4); }
+
+  /* ════════════════════════════════
+     TABLET ≥ 600px
+  ════════════════════════════════ */
+  @media (min-width:600px) {
+    nav { padding:0 2rem; height:64px; }
+    .nav-menu-btn { display:none; }
+    .nav-cta-desktop {
+      display:flex; align-items:center; gap:8px;
+      background:linear-gradient(135deg,var(--magenta),#A0189A); color:#fff;
+      font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:.78rem;
+      letter-spacing:3px; text-transform:uppercase; padding:10px 22px; text-decoration:none;
+      clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+      box-shadow:0 0 18px rgba(216,31,191,.38); transition:all .2s; flex-shrink:0;
+    }
+    .nav-cta-desktop:hover { box-shadow:0 0 34px rgba(216,31,191,.7); }
+
+    .hero { padding:4rem 2.5rem; }
+    .hero-logo-wrap { width:190px; height:190px; }
+    .hr1 { width:190px; height:190px; }
+    .hr2 { width:230px; height:230px; }
+    .hero-btns { flex-direction:row; max-width:none; }
+
+    .stats-bar { grid-template-columns:repeat(4,1fr); }
+    .stat-cell { border-bottom:none; }
+    .stat-cell:nth-child(2n) { border-right:1px solid rgba(255,255,255,.06); }
+    .stat-cell:last-child { border-right:none; }
+
+    .section-videos { padding:3rem 2rem; }
+    .videos-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto; }
+    .vcard.featured { grid-column:1/3; }
+    .vcard.featured .vcard-thumb { height:220px; }
+    .vcard:not(.featured) .vcard-thumb { height:145px; font-size:3rem; }
+
+    .section-about { padding:3.5rem 2.5rem; }
+    .section-cta { padding:5.5rem 2.5rem; }
+    .cta-btn { width:auto; }
+
+    footer { flex-direction:row; justify-content:space-between; text-align:left; gap:0; }
+  }
+
+  /* ════════════════════════════════
+     DESKTOP ≥ 960px
+  ════════════════════════════════ */
+  @media (min-width:960px) {
+    nav { padding:0 3.5rem; height:68px; }
+    .nav-links { display:flex; gap:2.2rem; list-style:none; }
+    .nav-links a { font-size:.76rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--dim); text-decoration:none; transition:color .2s; }
+    .nav-links a:hover { color:var(--blue); }
+
+    /* hero 2-col */
+    .hero {
+      display:grid; grid-template-columns:1fr 1fr;
+      align-items:center; text-align:left;
+      padding:5rem; min-height:92vh; gap:0;
+    }
+    .hero-eyebrow { justify-content:flex-start; }
+    .hero-h1 { font-size:clamp(5rem,7.5vw,8rem); }
+    .hero-btns { flex-direction:row; max-width:none; }
+    .hero-logo-wrap { width:300px; height:300px; margin:0 auto; }
+    .hr1 { width:300px; height:300px; }
+    .hr2 { width:360px; height:360px; }
+    .hero-content-col { order:1; }
+    .hero-logo-col { order:2; display:flex; justify-content:center; }
+    .hero-logo-mobile { display:none !important; }
+    #heroLogoDesktop { display:flex; }
+
+    .stat-num { font-size:2.8rem; }
+
+    /* video grid: big-left */
+    .videos-grid { grid-template-columns:2fr 1fr 1fr; grid-template-rows:auto auto; }
+    .vcard.featured { grid-column:1/2; grid-row:1/3; }
+    .vcard.featured .vcard-thumb { height:260px; font-size:4.5rem; }
+    .vcard:not(.featured) .vcard-thumb { height:130px; font-size:2.8rem; }
+    .section-videos { padding:5rem; }
+
+    /* about 2-col */
+    .section-about { display:grid; grid-template-columns:1fr 1fr; padding:0; }
+    .about-logo-mobile { display:none !important; }
+    .about-text-col {
+      padding:5rem; border-right:1px solid rgba(30,159,232,.15);
+      display:flex; flex-direction:column; justify-content:center;
+    }
+    .about-visual-col {
+      background:var(--black3); display:flex; align-items:center; justify-content:center;
+      min-height:480px; position:relative;
+    }
+    .about-visual-col::before {
+      content:''; position:absolute; inset:0;
+      background-image:linear-gradient(rgba(30,159,232,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(30,159,232,.05) 1px,transparent 1px);
+      background-size:40px 40px;
+    }
+    .about-logo-desktop {
+      width:260px; height:260px; position:relative; z-index:2;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .about-logo-desktop img {
+      width:100%; height:100%; object-fit:contain;
+      filter:drop-shadow(0 0 30px rgba(30,159,232,.5)) drop-shadow(0 0 60px rgba(216,31,191,.3));
+      animation:float 5s ease-in-out infinite;
+    }
+    .about-logo-desktop::before {
+      content:''; position:absolute; inset:-28px; border:1px solid rgba(30,159,232,.2); border-radius:50%;
+      animation:spin 14s linear infinite;
+    }
+    .about-logo-desktop::after {
+      content:''; position:absolute; inset:-52px; border:1px solid rgba(216,31,191,.15); border-radius:50%;
+      animation:spin 22s linear infinite reverse;
+    }
+
+    .section-cta { padding:7rem 5rem; }
+    footer { padding:2.5rem 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">
+    <img src="imgs/cachorradas-logo-menu.png" alt="Cachorradas Estúdios">
+  </a>
+  <ul class="nav-links">
+    <li><a href="#hero">Início</a></li>
+    <li><a href="#videos">Vídeos</a></li>
+    <li><a href="https://www.youtube.com/@CachorradasEstudios/shorts" target="_blank" rel="noopener">Shorts</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <a class="nav-cta-desktop" href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener">⚡ Inscrever-se</a>
+  <button class="nav-menu-btn" id="menuBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<nav class="nav-drawer" id="navDrawer">
+  <a href="#hero">Início</a>
+  <a href="#videos">Vídeos</a>
+  <a href="https://www.youtube.com/@CachorradasEstudios/shorts" target="_blank" rel="noopener">Shorts</a>
+  <a href="#sobre">Sobre</a>
+  <a href="#contato">Contato</a>
+  <a href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener" class="drawer-cta">⚡ Inscrever-se</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-video-bg">
+    <video autoplay muted loop playsinline preload="auto" poster="imgs/Cachorradas BG.jpeg">
+      <source src="imgs/Cachorradas BG Black.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-scanline"></div>
+  <div class="grid-bg"></div>
+  <div class="orb orb-m"></div>
+  <div class="orb orb-b"></div>
+
+  <div class="hero-content-col">
+    <div class="hero-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span>Canal Oficial · YouTube</span>
+    </div>
+    <!-- Logo: shown here on mobile only, hidden on desktop via CSS -->
+    <div class="hero-logo-wrap hero-logo-mobile" id="heroLogoMobile">
+      <div class="hero-ring hr2"></div>
+      <div class="hero-ring hr1"></div>
+      <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo" width="150" height="150">
+    </div>
+    <h1 class="hero-h1">
+      <span class="h1-blue">Cachorradas</span>
+      <span class="h1-magenta">Estúdios</span>
+    </h1>
+    <p class="hero-desc">Conteúdo <strong>original, intenso e sem filtro</strong> toda semana. Um estúdio feito para quem não aceita o mediano.</p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="https://www.youtube.com/@CachorradasEstudios" target="_blank" rel="noopener">▶&nbsp; Ver Vídeos</a>
+      <a class="btn-outline"  href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener">🔔&nbsp; Inscrever-se</a>
+    </div>
+  </div>
+
+  <!-- Logo col: only on desktop -->
+  <div class="hero-logo-col" id="heroLogoDesktop">
+    <div class="hero-logo-wrap">
+      <div class="hero-ring hr2"></div>
+      <div class="hero-ring hr1"></div>
+      <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo" width="300" height="300">
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-cell"><span class="stat-num blue">43</span><span class="stat-label">Inscritos</span></div>
+  <div class="stat-cell"><span class="stat-num magenta">10</span><span class="stat-label">Vídeos</span></div>
+  <div class="stat-cell"><span class="stat-num blue">+500</span><span class="stat-label">Visualizações</span></div>
+  <div class="stat-cell"><span class="stat-num magenta">3</span><span class="stat-label">Séries</span></div>
+</div>
+
+<!-- VIDEOS -->
+<section class="section-videos" id="videos">
+  <div class="section-head">
+    <div class="section-label">Últimos <span>Drops</span></div>
+    <div class="section-rule"></div>
+    <a class="section-view-all" href="https://www.youtube.com/@CachorradasEstudios/videos" target="_blank" rel="noopener">Ver todos →</a>
+  </div>
+  <div class="videos-grid">
+    <a class="vcard featured t-mag" href="https://www.youtube.com/watch?v=ID_arZgHTEw" target="_blank" rel="noopener">
+      <div class="vcard-thumb">
+        <img src="https://img.youtube.com/vi/ID_arZgHTEw/maxresdefault.jpg" alt="A Guerra dos Diamantes Vivos" loading="lazy">
+        <div class="vcard-badge badge-fire">DESTAQUE</div>
+        <div class="play-btn"><span>▶</span></div>
+      </div>
+      <div class="vcard-info"><span class="vcard-cat cat-mag">GDV · Série</span><div class="vcard-title">A Guerra dos Diamantes Vivos</div><div class="vcard-meta">Assistir no YouTube</div></div>
+    </a>
+    <a class="vcard t-blue" href="https://www.youtube.com/watch?v=Nk3SBbssZ9s" target="_blank" rel="noopener">
+      <div class="vcard-thumb">
+        <img src="https://img.youtube.com/vi/Nk3SBbssZ9s/maxresdefault.jpg" alt="Metallica Slayer Ep 3" loading="lazy">
+        <div class="vcard-badge badge-new">NOVO</div>
+        <div class="play-btn"><span>▶</span></div>
+      </div>
+      <div class="vcard-info"><span class="vcard-cat cat-blue">Metallica Slayer · Ep 3</span><div class="vcard-title">Ziriguidum e o Bagre</div><div class="vcard-meta">Assistir no YouTube</div></div>
+    </a>
+    <a class="vcard t-mix" href="https://www.youtube.com/watch?v=OAmL05EYN-k" target="_blank" rel="noopener">
+      <div class="vcard-thumb">
+        <img src="https://img.youtube.com/vi/OAmL05EYN-k/maxresdefault.jpg" alt="E SE??? Episódio 1" loading="lazy">
+        <div class="vcard-badge badge-hot">SÉRIE</div>
+        <div class="play-btn"><span>▶</span></div>
+      </div>
+      <div class="vcard-info"><span class="vcard-cat cat-mag">E SE??? · Ep 1</span><div class="vcard-title">E SE??? Episódio 1</div><div class="vcard-meta">Assistir no YouTube</div></div>
+    </a>
+    <a class="vcard t-dark" href="https://www.youtube.com/watch?v=wzm_cXBGal0" target="_blank" rel="noopener">
+      <div class="vcard-thumb">
+        <img src="https://img.youtube.com/vi/wzm_cXBGal0/maxresdefault.jpg" alt="Trailer GDV" loading="lazy">
+        <div class="play-btn"><span>▶</span></div>
+      </div>
+      <div class="vcard-info"><span class="vcard-cat cat-blue">GDV · Trailer</span><div class="vcard-title">TRAILER: Guerra dos Diamantes Vivos</div><div class="vcard-meta">Assistir no YouTube</div></div>
+    </a>
+    <a class="vcard t-dark2" href="https://www.youtube.com/watch?v=zsWmrELZ26I" target="_blank" rel="noopener">
+      <div class="vcard-thumb">
+        <img src="https://img.youtube.com/vi/zsWmrELZ26I/maxresdefault.jpg" alt="Metallica Slayer Ep 2" loading="lazy">
+        <div class="play-btn"><span>▶</span></div>
+      </div>
+      <div class="vcard-info"><span class="vcard-cat cat-mag">Metallica Slayer · Ep 2</span><div class="vcard-title">A Seleção Inicial</div><div class="vcard-meta">Assistir no YouTube</div></div>
+    </a>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    <span>Metallica Slayer</span><span class="dot">◆</span>
+    <span>E SE???</span><span class="dot">◆</span>
+    <span>Guerra dos Diamantes Vivos</span><span class="dot">◆</span>
+    <span>10 vídeos no canal</span><span class="dot">◆</span>
+    <span>Conteúdo 100% original</span><span class="dot">◆</span>
+    <span>Cachorradas Estúdios</span><span class="dot">◆</span>
+    <span>Metallica Slayer</span><span class="dot">◆</span>
+    <span>E SE???</span><span class="dot">◆</span>
+    <span>Guerra dos Diamantes Vivos</span><span class="dot">◆</span>
+    <span>10 vídeos no canal</span><span class="dot">◆</span>
+    <span>Conteúdo 100% original</span><span class="dot">◆</span>
+    <span>Cachorradas Estúdios</span><span class="dot">◆</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="section-about" id="sobre">
+  <!-- Mobile: single column -->
+  <div class="about-text-col">
+    <div class="about-logo-mobile">
+      <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo">
+    </div>
+    <div class="about-eyebrow">Nossa história</div>
+    <div class="about-h2">
+      <span class="line-blue">Feitos para</span>
+      <span class="line-magenta">Incomodar</span>
+      <span style="color:var(--white)">o Padrão.</span>
+    </div>
+    <p class="about-p">Somos um estúdio de conteúdo <strong>sem fórmula e sem filtro</strong>. Cada vídeo é uma aposta numa ideia corajosa, executada com energia total.</p>
+    <p class="about-p">Do primeiro frame ao último segundo, o compromisso é simples: <strong>fazer você querer mais</strong>.</p>
+    <a class="btn-primary" href="https://www.youtube.com/@CachorradasEstudios" target="_blank" rel="noopener" style="align-self:flex-start;margin-top:.5rem;">Ver o Canal →</a>
+  </div>
+  <!-- Desktop only visual col -->
+  <div class="about-visual-col">
+    <div class="about-logo-desktop">
+      <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo">
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta">
+  <div class="cta-orb-l"></div>
+  <div class="cta-orb-r"></div>
+  <div class="cta-content">
+    <div class="cta-eyebrow">Junte-se à família</div>
+    <div class="cta-h2">
+      <span class="l1">Não fique</span>
+      <span class="l2">de fora.</span>
+    </div>
+    <p class="cta-sub">Inscreva-se no canal, ative o sininho e seja o primeiro a ver tudo que sai do Cachorradas Estúdios.</p>
+    <a class="cta-btn" href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener">⚡&nbsp; Inscrever-se Agora</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contato">
+  <a class="footer-brand" href="https://www.youtube.com/@CachorradasEstudios" target="_blank" rel="noopener">
+    <img src="imgs/cachorradas-logo-menu.png" alt="Cachorradas Estúdios" style="height:32px;width:auto;object-fit:contain;">
+  </a>
+  <p>© 2025 Cachorradas Estúdios · Todos os direitos reservados</p>
+  <div class="footer-socials">
+    <a href="https://www.youtube.com/@CachorradasEstudios" target="_blank" rel="noopener" title="YouTube">▶</a>
+  </div>
+</footer>
+
+<script>
+  // Menu hamburger
+  const btn = document.getElementById('menuBtn');
+  const drawer = document.getElementById('navDrawer');
+  btn.addEventListener('click', () => drawer.classList.toggle('open'));
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => drawer.classList.remove('open')));
+</script>
+</body>
+</html>
