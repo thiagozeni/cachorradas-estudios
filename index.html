@@ -559,6 +559,91 @@
 
     .section-cta { padding:7rem 5rem; }
     footer { padding:2.5rem 4rem; }
+
+    /* games desktop */
+    .section-games { padding:4rem 5rem; }
+    .game-layout { gap:4rem; }
+    .game-title { font-size:clamp(2.8rem,4.5vw,5rem); }
+    .game-chars img { height:110px; }
+    .game-cta { align-self:flex-start; }
+  }
+
+  /* ══ GAMES ══ */
+  .section-games {
+    padding:2.5rem 1.2rem; background:var(--black);
+    border-top:1px solid rgba(30,159,232,.15);
+  }
+  .game-layout { display:flex; flex-direction:column; gap:1.5rem; margin-top:1.5rem; }
+
+  .game-video-wrap {
+    position:relative; border:1px solid rgba(30,159,232,.3);
+    box-shadow:0 0 32px rgba(30,159,232,.12), 0 0 64px rgba(216,31,191,.08);
+    overflow:hidden; background:#000; flex:1;
+  }
+  .game-video-wrap::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px; z-index:3;
+    background:linear-gradient(90deg,var(--blue),var(--magenta),var(--blue));
+  }
+  .game-video-wrap video {
+    width:100%; display:block; aspect-ratio:16/9; object-fit:cover;
+  }
+  .game-video-badge {
+    position:absolute; bottom:10px; left:10px; z-index:4;
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:.58rem;
+    letter-spacing:3px; text-transform:uppercase; padding:5px 10px;
+    background:rgba(10,10,10,.85); border:1px solid rgba(30,159,232,.5); color:var(--blue);
+  }
+
+  .game-info { display:flex; flex-direction:column; flex:1; }
+  .game-eyebrow {
+    font-size:.62rem; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+    color:var(--blue); margin-bottom:1rem; display:flex; align-items:center; gap:10px;
+  }
+  .game-eyebrow::before { content:''; width:18px; height:1px; background:var(--blue); box-shadow:0 0 5px var(--blue); flex-shrink:0; }
+
+  .game-title {
+    font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic;
+    text-transform:uppercase; line-height:.92; font-size:clamp(3rem,14vw,5rem); margin-bottom:1.4rem;
+  }
+  .gt-blue    { display:block; color:var(--blue);    text-shadow:0 0 28px rgba(30,159,232,.6); }
+  .gt-magenta { display:block; color:var(--magenta); text-shadow:0 0 28px rgba(216,31,191,.6); }
+
+  .game-desc {
+    font-size:.95rem; font-weight:300; color:var(--dim); line-height:1.8; margin-bottom:.5rem;
+  }
+  .game-desc strong { color:var(--white); font-weight:700; }
+
+  .game-chars {
+    display:flex; gap:.5rem; align-items:flex-end; margin:1.4rem 0;
+    border-top:1px solid rgba(255,255,255,.06); padding-top:1.2rem;
+  }
+  .game-chars img { height:90px; width:auto; object-fit:contain; flex-shrink:0; opacity:.88; transition:opacity .2s, transform .2s; }
+  .game-chars img:hover { opacity:1; transform:translateY(-4px); }
+
+  .game-cta {
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    background:linear-gradient(135deg,var(--blue),#1270A8); color:#fff;
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1rem;
+    letter-spacing:3px; text-transform:uppercase; padding:14px 28px; text-decoration:none;
+    clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+    box-shadow:0 0 22px rgba(30,159,232,.4); transition:all .2s;
+    position:relative; overflow:hidden; align-self:flex-start;
+  }
+  .game-cta:hover { box-shadow:0 0 46px rgba(30,159,232,.75); filter:brightness(1.1); }
+  .game-cta::after {
+    content:''; position:absolute; top:0; left:-80%; width:50%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
+    transform:skewX(-20deg); pointer-events:none;
+  }
+  .game-cta:hover::after { left:150%; transition:left .5s ease; }
+
+  @media (min-width:600px) {
+    .section-games { padding:2.5rem 2rem; }
+    .game-layout { flex-direction:row; gap:2rem; align-items:center; }
+    .game-video-wrap { flex:1.1; }
+    .game-info { flex:0.9; }
+    .game-title { font-size:clamp(2.2rem,5vw,4rem); }
+    .game-chars img { height:80px; }
   }
 </style>
 </head>
@@ -573,6 +658,7 @@
     <li><a href="#hero">Início</a></li>
     <li><a href="#videos">Vídeos</a></li>
     <li><a href="https://www.youtube.com/@CachorradasEstudios/shorts" target="_blank" rel="noopener">Shorts</a></li>
+    <li><a href="#jogos">Jogos</a></li>
     <li><a href="#sobre">Sobre</a></li>
     <li><a href="#contato">Contato</a></li>
   </ul>
@@ -586,6 +672,7 @@
   <a href="#hero">Início</a>
   <a href="#videos">Vídeos</a>
   <a href="https://www.youtube.com/@CachorradasEstudios/shorts" target="_blank" rel="noopener">Shorts</a>
+  <a href="#jogos">Jogos</a>
   <a href="#sobre">Sobre</a>
   <a href="#contato">Contato</a>
   <a href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener" class="drawer-cta">⚡ Inscrever-se</a>
@@ -644,6 +731,38 @@
   <div class="stat-cell"><span class="stat-num magenta">3</span><span class="stat-label">Séries</span></div>
 </div>
 <!-- STATS:END -->
+
+<!-- JOGOS -->
+<section class="section-games" id="jogos">
+  <div class="section-head">
+    <div class="section-label">Super <span>Lançamento</span></div>
+    <div class="section-rule"></div>
+  </div>
+  <div class="game-layout">
+    <!-- Vídeo de gameplay -->
+    <div class="game-video-wrap">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="imgs/werdum-fight/werdum-fight-gameplay.mp4" type="video/mp4">
+      </video>
+      <div class="game-video-badge">● Gameplay</div>
+    </div>
+    <!-- Informações -->
+    <div class="game-info">
+      <div class="game-eyebrow">Arena Beat'em Up · Pixel Art</div>
+      <h2 class="game-title">
+        <span class="gt-blue">Werdum</span>
+        <span class="gt-magenta">Fight Night</span>
+      </h2>
+      <p class="game-desc">Entre no ringue com <strong>Fabricio Werdum</strong>, Dida e Thor. Derrote ondas de capangas e proteja seu grande amigo Wanderleeeei nesse beat'em up em pixel art raiz — inspirado nos clássicos do MMA brasileiro. Quantas ondas você aguenta?</p>
+      <div class="game-chars">
+        <img src="imgs/werdum-fight/werdum-sideview.png" alt="Werdum">
+        <img src="imgs/werdum-fight/dida-sideview.png" alt="Dida">
+        <img src="imgs/werdum-fight/thor-sideview.png" alt="Thor">
+      </div>
+      <a class="game-cta" href="https://werdumfight.com" target="_blank" rel="noopener">🕹&nbsp; Jogar Agora</a>
+    </div>
+  </div>
+</section>
 
 <!-- VIDEOS -->
 <section class="section-videos" id="videos">
