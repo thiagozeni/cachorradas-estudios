@@ -603,10 +603,10 @@
 
   .game-title {
     font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic;
-    text-transform:uppercase; line-height:.92; font-size:clamp(3rem,14vw,5rem); margin-bottom:1.4rem;
+    text-transform:uppercase; line-height:.92; font-size:clamp(3rem,14vw,5rem); margin-bottom:1.4rem; white-space:nowrap;
   }
-  .gt-blue    { display:block; color:var(--blue);    text-shadow:0 0 28px rgba(30,159,232,.6); }
-  .gt-magenta { display:block; color:var(--magenta); text-shadow:0 0 28px rgba(216,31,191,.6); }
+  .gt-blue    { color:var(--blue);    text-shadow:0 0 28px rgba(30,159,232,.6); }
+  .gt-magenta { color:var(--magenta); text-shadow:0 0 28px rgba(216,31,191,.6); }
 
   .game-desc {
     font-size:.95rem; font-weight:300; color:var(--dim); line-height:1.8; margin-bottom:.5rem;
@@ -749,10 +749,7 @@
     <!-- Informações -->
     <div class="game-info">
       <div class="game-eyebrow">Arena Beat'em Up · Pixel Art</div>
-      <h2 class="game-title">
-        <span class="gt-blue">3</span>
-        <span class="gt-magenta">Contra Todos</span>
-      </h2>
+      <h2 class="game-title"><span class="gt-blue">3</span> <span class="gt-magenta">Contra Todos</span></h2>
       <p class="game-desc">Entre no ringue com <strong>Fabricio Werdum</strong>, Dida e Thor. Derrote ondas de capangas e proteja seu grande amigo Wanderleeeei nesse beat'em up em pixel art raiz — inspirado nos clássicos do MMA brasileiro. Quantas ondas você aguenta?</p>
       <div class="game-chars">
         <img src="imgs/werdum-fight/werdum-sideview.png" alt="Werdum">
