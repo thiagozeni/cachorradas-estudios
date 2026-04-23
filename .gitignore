@@ -3,3 +3,5 @@
 .env.*
 *.env
 _info/
+service_account.json
+*.pem
