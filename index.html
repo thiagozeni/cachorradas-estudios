@@ -50,8 +50,11 @@
     position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
   }
   .hero-video-bg video {
-    width:100%; height:100%; object-fit:cover; opacity:0.28;
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    transition:opacity 1000ms linear;
   }
+  .hero-video-bg video.hv-a { opacity:0.72; }
+  .hero-video-bg video.hv-b { opacity:0; }
   .hero-video-bg::after {
     content:''; position:absolute; inset:0;
     background:linear-gradient(160deg,rgba(10,10,10,0.45) 0%,rgba(10,10,10,0.72) 60%,rgba(10,10,10,0.92) 100%);
@@ -681,12 +684,14 @@
 <!-- HERO -->
 <section class="hero" id="hero">
   <div class="hero-video-bg">
-    <video autoplay muted loop playsinline preload="auto" poster="imgs/Cachorradas BG.jpeg">
+    <video class="hv-a" autoplay muted playsinline preload="auto" poster="imgs/Cachorradas BG.jpeg">
+      <source src="imgs/Cachorradas BG Black.mp4" type="video/mp4">
+    </video>
+    <video class="hv-b" muted playsinline preload="auto">
       <source src="imgs/Cachorradas BG Black.mp4" type="video/mp4">
     </video>
   </div>
   <div class="hero-scanline"></div>
-  <div class="grid-bg"></div>
   <div class="orb orb-m"></div>
   <div class="orb orb-b"></div>
 
@@ -837,7 +842,7 @@
   <!-- Mobile: single column -->
   <div class="about-text-col">
     <div class="about-logo-mobile">
-      <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo">
+      <img src="imgs/cachorradas-logo-removebg.png" alt="Cachorradas Estúdios">
     </div>
     <div class="about-eyebrow">Nossa história</div>
     <div class="about-h2">
@@ -852,7 +857,7 @@
   <!-- Desktop only visual col -->
   <div class="about-visual-col">
     <div class="about-logo-desktop">
-      <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo">
+      <img src="imgs/cachorradas-logo-removebg.png" alt="Cachorradas Estúdios">
     </div>
   </div>
 </section>
@@ -890,6 +895,34 @@
   const drawer = document.getElementById('navDrawer');
   btn.addEventListener('click', () => drawer.classList.toggle('open'));
   drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => drawer.classList.remove('open')));
+
+  // Hero video cross-dissolve: 2 vídeos alternando, 1s de fade no remendo do loop
+  (function () {
+    const a = document.querySelector('.hero-video-bg .hv-a');
+    const b = document.querySelector('.hero-video-bg .hv-b');
+    if (!a || !b) return;
+    const FADE_BEFORE_END = 1.0;
+    const FADE_MS = 1000;
+    const VISIBLE = 0.72;
+    let active = a, inactive = b;
+    const onTime = (e) => {
+      const v = e.target;
+      if (v !== active) return;
+      const dur = v.duration;
+      if (!isFinite(dur) || dur <= 0) return;
+      if (dur - v.currentTime <= FADE_BEFORE_END && inactive.paused) {
+        try { inactive.currentTime = 0; inactive.play(); } catch (err) {}
+        inactive.style.opacity = String(VISIBLE);
+        active.style.opacity = '0';
+        const oldActive = active;
+        setTimeout(() => { try { oldActive.pause(); } catch (err) {} }, FADE_MS + 50);
+        [active, inactive] = [inactive, active];
+      }
+    };
+    a.addEventListener('timeupdate', onTime);
+    b.addEventListener('timeupdate', onTime);
+    try { a.play(); } catch (e) {}
+  })();
 </script>
 </body>
 </html>
