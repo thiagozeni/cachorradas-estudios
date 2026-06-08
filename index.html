@@ -672,6 +672,55 @@
     .game-chars img { height:80px; }
   }
 
+  /* ══ UNIVERSO (séries / arcos) ══ */
+  .section-universo { padding:3rem 1.2rem; background:var(--black); border-top:1px solid rgba(30,159,232,.15); }
+  .universo-list { display:flex; flex-direction:column; gap:3.5rem; margin-top:1.8rem; }
+  .arc { display:flex; flex-direction:column; gap:1.3rem; }
+  .arc-visual {
+    position:relative; display:block; aspect-ratio:16/9; overflow:hidden;
+    border:1px solid rgba(255,255,255,.08); background:var(--black3);
+  }
+  .arc-visual img { position:absolute; left:0; top:-10%; width:100%; height:120%; object-fit:cover; transition:transform .4s; }
+  .arc-visual::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 45%,rgba(10,10,10,.5)); }
+  .arc-visual::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; z-index:2; }
+  .arc-visual:hover img { transform:scale(1.04); }
+  .arc-body { display:flex; flex-direction:column; gap:.7rem; }
+  .arc-index { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic; font-size:2.6rem; line-height:1; opacity:.22; }
+  .arc-eyebrow { font-family:var(--mono); font-size:.6rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+  .arc-eyebrow::before { content:''; width:18px; height:1px; flex-shrink:0; }
+  .arc-title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic; text-transform:uppercase; line-height:.92; font-size:clamp(2.1rem,8.5vw,3.4rem); }
+  .arc-desc { font-size:.95rem; font-weight:300; color:var(--dim); line-height:1.8; max-width:48ch; }
+  .arc-desc strong { color:var(--white); font-weight:700; }
+  .arc-cta { align-self:flex-start; font-family:var(--mono); font-weight:700; font-size:.68rem; letter-spacing:2px; text-transform:uppercase; text-decoration:none; border-bottom:1px solid; padding-bottom:3px; margin-top:.3rem; }
+
+  .arc-blue .arc-visual::before { background:var(--blue); box-shadow:0 0 14px var(--blue); }
+  .arc-blue .arc-eyebrow, .arc-blue .arc-cta { color:var(--blue); }
+  .arc-blue .arc-eyebrow::before { background:var(--blue); box-shadow:0 0 5px var(--blue); }
+  .arc-blue .arc-title { color:var(--blue); text-shadow:0 0 26px rgba(30,159,232,.45); }
+  .arc-blue .arc-index { color:var(--blue); }
+
+  .arc-mag .arc-visual::before { background:var(--magenta); box-shadow:0 0 14px var(--magenta); }
+  .arc-mag .arc-eyebrow, .arc-mag .arc-cta { color:var(--magenta); }
+  .arc-mag .arc-eyebrow::before { background:var(--magenta); box-shadow:0 0 5px var(--magenta); }
+  .arc-mag .arc-title { color:var(--magenta); text-shadow:0 0 26px rgba(216,31,191,.45); }
+  .arc-mag .arc-index { color:var(--magenta); }
+
+  .arc-mix .arc-visual::before { background:linear-gradient(90deg,var(--blue),var(--magenta)); box-shadow:0 0 14px rgba(120,80,220,.6); }
+  .arc-mix .arc-eyebrow, .arc-mix .arc-cta { color:#9b6cff; }
+  .arc-mix .arc-eyebrow::before { background:linear-gradient(90deg,var(--blue),var(--magenta)); }
+  .arc-mix .arc-title { background:linear-gradient(90deg,var(--blue),var(--magenta)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .arc-mix .arc-index { color:#9b6cff; }
+
+  @media (min-width:600px) { .section-universo { padding:3rem 2rem; } }
+  @media (min-width:960px) {
+    .section-universo { padding:5rem; }
+    .universo-list { gap:5.5rem; margin-top:2.5rem; }
+    .arc { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:3.5rem; min-height:68vh; }
+    .arc-body { gap:1rem; }
+    .arc-index { font-size:6rem; }
+    .arc:nth-child(even) .arc-visual { order:2; }
+  }
+
   /* ══ MONO DE CONTRAPONTO (rótulos técnicos) ══ */
   .hero-eyebrow span, .about-eyebrow, .cta-eyebrow, .game-eyebrow,
   .stat-label, .vcard-cat, .vcard-meta, .game-video-badge, .vcard-badge,
@@ -728,6 +777,7 @@
   <ul class="nav-links">
     <li><a href="#hero">Início</a></li>
     <li><a href="#videos">Vídeos</a></li>
+    <li><a href="#series">Séries</a></li>
     <li><a href="https://www.youtube.com/@CachorradasEstudios/shorts" target="_blank" rel="noopener">Shorts</a></li>
     <li><a href="#jogos">Jogos</a></li>
     <li><a href="#sobre">Sobre</a></li>
@@ -742,6 +792,7 @@
 <nav class="nav-drawer" id="navDrawer">
   <a href="#hero">Início</a>
   <a href="#videos">Vídeos</a>
+  <a href="#series">Séries</a>
   <a href="https://www.youtube.com/@CachorradasEstudios/shorts" target="_blank" rel="noopener">Shorts</a>
   <a href="#jogos">Jogos</a>
   <a href="#sobre">Sobre</a>
@@ -886,6 +937,57 @@
     </a>
   </div>
   <!-- VIDEOS:END -->
+</section>
+
+<!-- UNIVERSO -->
+<section class="section-universo" id="series">
+  <div class="section-head">
+    <div class="section-label">O <span>Universo</span></div>
+    <div class="section-rule"></div>
+    <a class="section-view-all" href="https://www.youtube.com/@CachorradasEstudios/playlists" target="_blank" rel="noopener">Playlists →</a>
+  </div>
+  <div class="universo-list">
+
+    <article class="arc arc-blue">
+      <a class="arc-visual" href="https://www.youtube.com/@CachorradasEstudios/search?query=metallica%20slayer" target="_blank" rel="noopener">
+        <img src="https://img.youtube.com/vi/zsWmrELZ26I/maxresdefault.jpg" alt="Metallica Slayer" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/zsWmrELZ26I/hqdefault.jpg'">
+      </a>
+      <div class="arc-body">
+        <div class="arc-index">01</div>
+        <div class="arc-eyebrow">Série · Comédia ácida</div>
+        <h3 class="arc-title">Metallica Slayer</h3>
+        <p class="arc-desc">A série mais <strong>caótica</strong> do estúdio. Episódio após episódio, o absurdo vira arte — da "Seleção Inicial" ao inexplicável "Ziriguidum e o Bagre". Humor sem freio, no nosso ritmo.</p>
+        <a class="arc-cta" href="https://www.youtube.com/@CachorradasEstudios/search?query=metallica%20slayer" target="_blank" rel="noopener">Ver a série →</a>
+      </div>
+    </article>
+
+    <article class="arc arc-mag">
+      <a class="arc-visual" href="https://www.youtube.com/@CachorradasEstudios/search?query=guerra%20dos%20diamantes%20vivos" target="_blank" rel="noopener">
+        <img src="https://img.youtube.com/vi/wzm_cXBGal0/maxresdefault.jpg" alt="Guerra dos Diamantes Vivos" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/wzm_cXBGal0/hqdefault.jpg'">
+      </a>
+      <div class="arc-body">
+        <div class="arc-index">02</div>
+        <div class="arc-eyebrow">Saga · Carro-chefe</div>
+        <h3 class="arc-title">Guerra dos Diamantes Vivos</h3>
+        <p class="arc-desc">A saga mais <strong>ambiciosa</strong> do canal. Teve trailer, tem episódios e promete guerra — o épico autoral do Cachorradas, do primeiro frame ao último.</p>
+        <a class="arc-cta" href="https://www.youtube.com/@CachorradasEstudios/search?query=guerra%20dos%20diamantes%20vivos" target="_blank" rel="noopener">Ver a série →</a>
+      </div>
+    </article>
+
+    <article class="arc arc-mix">
+      <a class="arc-visual" href="https://www.youtube.com/@CachorradasEstudios/search?query=e%20se" target="_blank" rel="noopener">
+        <img src="https://img.youtube.com/vi/OAmL05EYN-k/maxresdefault.jpg" alt="E SE???" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/OAmL05EYN-k/hqdefault.jpg'">
+      </a>
+      <div class="arc-body">
+        <div class="arc-index">03</div>
+        <div class="arc-eyebrow">Antologia · Experimental</div>
+        <h3 class="arc-title">E SE???</h3>
+        <p class="arc-desc">E se a gente virasse <strong>tudo de cabeça pra baixo</strong>? A cada episódio, uma hipótese improvável levada às últimas consequências. O laboratório de ideias do estúdio.</p>
+        <a class="arc-cta" href="https://www.youtube.com/@CachorradasEstudios/search?query=e%20se" target="_blank" rel="noopener">Ver a série →</a>
+      </div>
+    </article>
+
+  </div>
 </section>
 
 <!-- TICKER -->
@@ -1079,6 +1181,25 @@
       gsap.from('.cta-content', {
         y: 48, opacity: 0, duration: 0.8, ease: 'power3.out',
         scrollTrigger: { trigger: '.section-cta', start: 'top 80%' },
+      });
+
+      // Universo: cada arco revela visual + corpo (stagger) e a imagem faz parallax
+      gsap.utils.toArray('.arc').forEach((arc) => {
+        const vis = arc.querySelector('.arc-visual');
+        const body = arc.querySelector('.arc-body');
+        gsap.from(vis, {
+          autoAlpha: 0, y: 60, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: arc, start: 'top 78%' },
+        });
+        gsap.from(body.children, {
+          autoAlpha: 0, y: 40, duration: 0.7, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: arc, start: 'top 72%' },
+        });
+        const img = vis.querySelector('img');
+        if (img) gsap.fromTo(img, { yPercent: -6 }, {
+          yPercent: 6, ease: 'none',
+          scrollTrigger: { trigger: arc, start: 'top bottom', end: 'bottom top', scrub: true },
+        });
       });
 
       // recalcula posições após carregar fontes/imagens
