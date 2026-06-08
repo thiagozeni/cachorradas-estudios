@@ -21,6 +21,9 @@
 <meta property="og:description" content="Conteúdo original, intenso e sem filtro toda semana.">
 <meta property="og:image" content="imgs/Cachorradas BG.jpeg">
 <meta property="og:type" content="website">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
 <style>
   :root {
     --blue:    #1E9FE8;
@@ -169,6 +172,7 @@
   /* Mobile drawer */
   .nav-drawer {
     display:none; position:fixed; top:60px; left:0; right:0; bottom:0;
+    height:auto; /* anula o `nav { height:60px }` global que colapsava o drawer */
     background:rgba(10,10,10,0.98); backdrop-filter:blur(20px);
     z-index:199; flex-direction:column; padding:2rem 1.5rem;
     border-top:1px solid rgba(30,159,232,0.2);
@@ -648,9 +652,43 @@
     .game-title { font-size:clamp(2.2rem,5vw,4rem); }
     .game-chars img { height:80px; }
   }
+
+  /* ══ HERO WEBGL FX (faíscas + órbita do logo) ══ */
+  .hero-fx {
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    opacity:0; transition:opacity 1.2s ease;
+  }
+  .hero.fx-on .hero-fx { opacity:1; }
+  .hero.fx-on .hero-ring { display:none; }   /* WebGL assume a órbita do logo */
+  .hero.fx-on .orb { opacity:.45; }           /* WebGL domina; orbs CSS recuam */
+
+  /* ══ SKIP LINK (acessibilidade de teclado) ══ */
+  .skip-link {
+    position:absolute; left:-9999px; top:0; z-index:1000;
+    background:var(--blue); color:#000; padding:10px 18px;
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    text-decoration:none;
+  }
+  .skip-link:focus { left:8px; top:8px; }
+
+  /* ══ FOCO DE TECLADO VISÍVEL ══ */
+  :focus-visible { outline:2px solid var(--blue); outline-offset:3px; border-radius:2px; }
+
+  /* ══ MOVIMENTO REDUZIDO (prefers-reduced-motion) ══ */
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after {
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+      scroll-behavior:auto !important;
+    }
+    .hero-video-bg video { display:none; }
+    .hero-fx { display:none; }
+  }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#videos">Pular para o conteúdo</a>
 
 <!-- NAV -->
 <nav>
@@ -666,7 +704,7 @@
     <li><a href="#contato">Contato</a></li>
   </ul>
   <a class="nav-cta-desktop" href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener">⚡ Inscrever-se</a>
-  <button class="nav-menu-btn" id="menuBtn" aria-label="Menu">
+  <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" aria-controls="navDrawer">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -684,16 +722,17 @@
 <!-- HERO -->
 <section class="hero" id="hero">
   <div class="hero-video-bg">
-    <video class="hv-a" autoplay muted playsinline preload="auto" poster="imgs/Cachorradas BG.jpeg">
+    <video class="hv-a" autoplay muted playsinline preload="metadata" poster="imgs/Cachorradas BG.jpeg">
       <source src="imgs/Cachorradas BG Black.mp4" type="video/mp4">
     </video>
-    <video class="hv-b" muted playsinline preload="auto">
+    <video class="hv-b" muted playsinline preload="metadata">
       <source src="imgs/Cachorradas BG Black.mp4" type="video/mp4">
     </video>
   </div>
   <div class="hero-scanline"></div>
   <div class="orb orb-m"></div>
   <div class="orb orb-b"></div>
+  <canvas class="hero-fx" id="heroFx" aria-hidden="true"></canvas>
 
   <div class="hero-content-col">
     <div class="hero-eyebrow">
@@ -746,7 +785,7 @@
   <div class="game-layout">
     <!-- Vídeo de gameplay -->
     <div class="game-video-wrap">
-      <video autoplay muted loop playsinline preload="auto">
+      <video id="gameVideo" muted loop playsinline preload="none" poster="imgs/werdum-fight/bg-ringue.png">
         <source src="imgs/werdum-fight/werdum-fight-gameplay.mp4" type="video/mp4">
       </video>
       <div class="game-video-badge">● Gameplay</div>
@@ -777,7 +816,7 @@
   <div class="videos-grid">
     <a class="vcard featured t-mag" href="https://www.youtube.com/watch?v=ID_arZgHTEw" target="_blank" rel="noopener">
       <div class="vcard-thumb">
-        <img src="https://img.youtube.com/vi/ID_arZgHTEw/maxresdefault.jpg" alt="A Guerra dos Diamante Vivos" loading="lazy">
+        <img src="https://img.youtube.com/vi/ID_arZgHTEw/maxresdefault.jpg" alt="A Guerra dos Diamante Vivos" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/ID_arZgHTEw/hqdefault.jpg'">
         <div class="vcard-badge badge-fire">DESTAQUE</div>
         <div class="play-btn"><span>▶</span></div>
       </div>
@@ -785,7 +824,7 @@
     </a>
     <a class="vcard t-blue" href="https://www.youtube.com/watch?v=Nk3SBbssZ9s" target="_blank" rel="noopener">
       <div class="vcard-thumb">
-        <img src="https://img.youtube.com/vi/Nk3SBbssZ9s/maxresdefault.jpg" alt="Metallica Slayer - Ziriguidum e o Bagre [Ep 3]" loading="lazy">
+        <img src="https://img.youtube.com/vi/Nk3SBbssZ9s/maxresdefault.jpg" alt="Metallica Slayer - Ziriguidum e o Bagre [Ep 3]" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/Nk3SBbssZ9s/hqdefault.jpg'">
         <div class="vcard-badge badge-new">NOVO</div>
         <div class="play-btn"><span>▶</span></div>
       </div>
@@ -793,7 +832,7 @@
     </a>
     <a class="vcard t-mag" href="https://www.youtube.com/watch?v=wzm_cXBGal0" target="_blank" rel="noopener">
       <div class="vcard-thumb">
-        <img src="https://img.youtube.com/vi/wzm_cXBGal0/maxresdefault.jpg" alt="TRAILER GDV: GUERRA DOS DIAMANTES VIVOS" loading="lazy">
+        <img src="https://img.youtube.com/vi/wzm_cXBGal0/maxresdefault.jpg" alt="TRAILER GDV: GUERRA DOS DIAMANTES VIVOS" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/wzm_cXBGal0/hqdefault.jpg'">
         <div class="vcard-badge badge-hot">SÉRIE</div>
         <div class="play-btn"><span>▶</span></div>
       </div>
@@ -801,7 +840,7 @@
     </a>
     <a class="vcard t-mix" href="https://www.youtube.com/watch?v=OAmL05EYN-k" target="_blank" rel="noopener">
       <div class="vcard-thumb">
-        <img src="https://img.youtube.com/vi/OAmL05EYN-k/maxresdefault.jpg" alt="E SE??? Episódio 1" loading="lazy">
+        <img src="https://img.youtube.com/vi/OAmL05EYN-k/maxresdefault.jpg" alt="E SE??? Episódio 1" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/OAmL05EYN-k/hqdefault.jpg'">
         <div class="vcard-badge badge-hot">SÉRIE</div>
         <div class="play-btn"><span>▶</span></div>
       </div>
@@ -809,7 +848,7 @@
     </a>
     <a class="vcard t-blue" href="https://www.youtube.com/watch?v=zsWmrELZ26I" target="_blank" rel="noopener">
       <div class="vcard-thumb">
-        <img src="https://img.youtube.com/vi/zsWmrELZ26I/maxresdefault.jpg" alt="Metallica Slayer - A Seleção Inicial [Ep 2]" loading="lazy">
+        <img src="https://img.youtube.com/vi/zsWmrELZ26I/maxresdefault.jpg" alt="Metallica Slayer - A Seleção Inicial [Ep 2]" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/zsWmrELZ26I/hqdefault.jpg'">
         <div class="vcard-badge badge-hot">SÉRIE</div>
         <div class="play-btn"><span>▶</span></div>
       </div>
@@ -872,7 +911,7 @@
       <span class="l1">Não fique</span>
       <span class="l2">de fora.</span>
     </div>
-    <p class="cta-sub">Inscreva-se no canal, ative o sininho e seja o primeiro a ver tudo que sai do Cachorradas Estúdios.</p>
+    <p class="cta-sub">Toda semana sai coisa nova. Inscreve, ativa o sininho e vê cada drop em primeira mão — antes de todo mundo.</p>
     <a class="cta-btn" href="https://www.youtube.com/@CachorradasEstudios?sub_confirmation=1" target="_blank" rel="noopener">⚡&nbsp; Inscrever-se Agora</a>
   </div>
 </section>
@@ -889,12 +928,38 @@
   </div>
 </footer>
 
+<!-- Motion: GSAP + ScrollTrigger + Lenis (GSAP 100% gratuito desde 2025) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
 <script>
   // Menu hamburger
   const btn = document.getElementById('menuBtn');
   const drawer = document.getElementById('navDrawer');
-  btn.addEventListener('click', () => drawer.classList.toggle('open'));
-  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => drawer.classList.remove('open')));
+  const setMenu = (open) => {
+    drawer.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  };
+  btn.addEventListener('click', () => setMenu(!drawer.classList.contains('open')));
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+
+  // Gameplay: só carrega/toca quando visível (preload="none") e respeita reduced-motion
+  (function () {
+    const v = document.getElementById('gameVideo');
+    if (!v) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) { try { v.play(); } catch (e) {} }
+        else { try { v.pause(); } catch (e) {} }
+      });
+    }, { threshold: 0.25 });
+    io.observe(v);
+  })();
 
   // Hero video cross-dissolve: 2 vídeos alternando, 1s de fade no remendo do loop
   (function () {
@@ -922,6 +987,243 @@
     a.addEventListener('timeupdate', onTime);
     b.addEventListener('timeupdate', onTime);
     try { a.play(); } catch (e) {}
+  })();
+</script>
+
+<script>
+  // ══ Motion: Lenis smooth scroll + GSAP ScrollTrigger reveals ══
+  // Tudo dentro de matchMedia: quem tem prefers-reduced-motion não recebe nada.
+  (function () {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      // — Lenis smooth scroll sincronizado ao ticker do GSAP —
+      let lenis;
+      if (typeof Lenis !== 'undefined') {
+        lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((t) => lenis.raf(t * 1000));
+        gsap.ticker.lagSmoothing(0);
+        document.documentElement.style.scrollBehavior = 'auto';
+        // âncoras internas via Lenis (evita conflito com o scroll nativo)
+        document.querySelectorAll('a[href^="#"]').forEach((a) => {
+          a.addEventListener('click', (e) => {
+            const id = a.getAttribute('href');
+            const target = id.length > 1 && document.querySelector(id);
+            if (target) {
+              e.preventDefault();
+              lenis.scrollTo(target, { offset: -64 });
+              document.getElementById('navDrawer').classList.remove('open');
+            }
+          });
+        });
+      }
+
+      // — Contadores animados dos stats (preserva prefixo/sufixo: +684, +1k…) —
+      document.querySelectorAll('.stat-num').forEach((el) => {
+        const m = el.textContent.trim().match(/^(\D*)(\d+)(.*)$/);
+        if (!m) return;
+        const pre = m[1], target = +m[2], suf = m[3], obj = { v: 0 };
+        gsap.to(obj, {
+          v: target, duration: 1.4, ease: 'power2.out',
+          onUpdate: () => { el.textContent = pre + Math.round(obj.v) + suf; },
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        });
+      });
+
+      // — Reveals no scroll (gsap.from esconde só os que estão fora da dobra) —
+      gsap.from('.section-games .game-video-wrap, .section-games .game-info', {
+        y: 48, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.15,
+        scrollTrigger: { trigger: '.section-games', start: 'top 78%' },
+      });
+      gsap.from('.videos-grid .vcard', {
+        y: 50, opacity: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08,
+        scrollTrigger: { trigger: '.videos-grid', start: 'top 82%' },
+      });
+      gsap.from('.about-text-col, .about-visual-col', {
+        y: 48, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.15,
+        scrollTrigger: { trigger: '.section-about', start: 'top 78%' },
+      });
+      gsap.from('.cta-content', {
+        y: 48, opacity: 0, duration: 0.8, ease: 'power3.out',
+        scrollTrigger: { trigger: '.section-cta', start: 'top 80%' },
+      });
+
+      // recalcula posições após carregar fontes/imagens
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+
+      return () => { if (lenis) lenis.destroy(); };
+    });
+  })();
+</script>
+
+<script type="module">
+  // ══ Hero WebGL FX: partículas orbitais + faíscas elétricas ao redor do logo ══
+  // Fallback total: se Three/WebGL falhar ou reduced-motion, os efeitos CSS (rings/orbs) ficam.
+  import * as THREE from 'three';
+
+  (function () {
+    const heroEl = document.querySelector('.hero');
+    const canvas = document.getElementById('heroFx');
+    if (!heroEl || !canvas) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    } catch (e) { return; } // sem WebGL → mantém CSS
+
+    const BLUE = new THREE.Color(0x1E9FE8);
+    const MAG = new THREE.Color(0xD81FBF);
+
+    let W = heroEl.clientWidth, H = heroEl.clientHeight;
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(0, W, 0, H, -1000, 1000); // origem top-left, y p/ baixo
+    camera.position.z = 10;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setSize(W, H, false);
+
+    // sprite de glow gerado em runtime (sem asset externo)
+    function glowTexture() {
+      const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
+      const g = c.getContext('2d');
+      const grd = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      grd.addColorStop(0, 'rgba(255,255,255,1)');
+      grd.addColorStop(0.3, 'rgba(255,255,255,0.55)');
+      grd.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = grd; g.fillRect(0, 0, s, s);
+      return new THREE.CanvasTexture(c);
+    }
+
+    // centro/raio = logo visível (resolve os dois wraps mobile/desktop)
+    function logoCenter() {
+      let vis = null;
+      heroEl.querySelectorAll('.hero-logo-wrap').forEach((w) => { if (w.offsetParent !== null) vis = w; });
+      const hr = heroEl.getBoundingClientRect();
+      if (vis) {
+        const r = vis.getBoundingClientRect();
+        return { x: r.left - hr.left + r.width / 2, y: r.top - hr.top + r.height / 2, R: r.width / 2 };
+      }
+      return { x: W * 0.7, y: H * 0.5, R: Math.min(W, H) * 0.12 };
+    }
+    let C = logoCenter();
+
+    // ── partículas orbitais ──
+    const N = Math.max(110, Math.min(240, Math.floor(W * H / 7500)));
+    const positions = new Float32Array(N * 3);
+    const colors = new Float32Array(N * 3);
+    const orb = [];
+    for (let i = 0; i < N; i++) {
+      // banda orbital justa ao logo, quase circular → lê como aura, não poeira
+      const ring = 0.72 + Math.random() * 0.7;          // 0.72–1.42 do raio do logo
+      orb.push({
+        a: Math.random() * Math.PI * 2,
+        speed: (0.12 + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1),
+        rx: ring * (0.95 + Math.random() * 0.2),         // multiplicadores de C.R (resize-safe)
+        ry: ring * (0.85 + Math.random() * 0.2),
+        tilt: Math.random() * Math.PI,
+      });
+      const c = Math.random() < 0.5 ? BLUE : MAG;
+      colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const points = new THREE.Points(geo, new THREE.PointsMaterial({
+      size: 9, map: glowTexture(), vertexColors: true, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: false,
+    }));
+    scene.add(points);
+
+    // ── faíscas elétricas ──
+    const SP = 4, SEG = 8;
+    const sparkPos = new Float32Array(SP * SEG * 2 * 3);
+    const sparkGeo = new THREE.BufferGeometry();
+    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+    scene.add(new THREE.LineSegments(sparkGeo, new THREE.LineBasicMaterial({
+      color: 0xBFF2FF, transparent: true, opacity: 1.0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    })));
+    const sparks = Array.from({ length: SP }, () => ({ next: 0, until: 0 }));
+    function clearSpark(i) { const b = i * SEG * 2 * 3; for (let k = 0; k < SEG * 2 * 3; k++) sparkPos[b + k] = 0; }
+    function genSpark(s, i, now) {
+      const a = Math.random() * Math.PI * 2;
+      const r0 = C.R * 0.6, r1 = C.R * (1.3 + Math.random() * 0.8);
+      const x0 = C.x + Math.cos(a) * r0, y0 = C.y + Math.sin(a) * r0;
+      const x1 = C.x + Math.cos(a) * r1, y1 = C.y + Math.sin(a) * r1;
+      const jit = () => (Math.random() - 0.5) * C.R * 0.28;
+      const b = i * SEG * 2 * 3;
+      for (let k = 0; k < SEG; k++) {
+        const t0 = k / SEG, t1 = (k + 1) / SEG, o = b + k * 6;
+        sparkPos[o] = x0 + (x1 - x0) * t0 + (k ? jit() : 0);
+        sparkPos[o + 1] = y0 + (y1 - y0) * t0 + (k ? jit() : 0);
+        sparkPos[o + 2] = 0;
+        sparkPos[o + 3] = x0 + (x1 - x0) * t1 + (k < SEG - 1 ? jit() : 0);
+        sparkPos[o + 4] = y0 + (y1 - y0) * t1 + (k < SEG - 1 ? jit() : 0);
+        sparkPos[o + 5] = 0;
+      }
+      s.until = now + 90 + Math.random() * 130;
+      s.next = now + 500 + Math.random() * 1300;
+    }
+    function updateSparks(now) {
+      for (let i = 0; i < SP; i++) {
+        const s = sparks[i];
+        if (now > s.until) clearSpark(i);
+        if (now > s.next) genSpark(s, i, now);
+      }
+      sparkGeo.attributes.position.needsUpdate = true;
+    }
+
+    // ── parallax de mouse ──
+    let mx = 0, my = 0;
+    window.addEventListener('pointermove', (e) => {
+      mx = (e.clientX / window.innerWidth - 0.5) * 26;
+      my = (e.clientY / window.innerHeight - 0.5) * 26;
+    }, { passive: true });
+
+    function updatePoints(dt) {
+      const p = geo.attributes.position.array;
+      for (let i = 0; i < N; i++) {
+        const o = orb[i]; o.a += o.speed * dt;
+        const ex = C.R * o.rx * Math.cos(o.a), ey = C.R * o.ry * Math.sin(o.a);
+        const ct = Math.cos(o.tilt), st = Math.sin(o.tilt);
+        p[i * 3] = C.x + ex * ct - ey * st + mx;
+        p[i * 3 + 1] = C.y + ex * st + ey * ct + my;
+        p[i * 3 + 2] = 0;
+      }
+      geo.attributes.position.needsUpdate = true;
+    }
+
+    let raf, last = performance.now(), running = false;
+    function tick(now) {
+      if (!running) return;
+      const dt = Math.min((now - last) / 1000, 0.05); last = now;
+      updatePoints(dt); updateSparks(now);
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tick);
+    }
+    function start() { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(tick); }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+
+    let rt;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => {
+        W = heroEl.clientWidth; H = heroEl.clientHeight;
+        renderer.setSize(W, H, false);
+        camera.right = W; camera.bottom = H; camera.updateProjectionMatrix();
+        C = logoCenter();
+      }, 180);
+    });
+
+    // só anima com o hero visível
+    new IntersectionObserver((es) => es.forEach((e) => (e.isIntersecting ? start() : stop())),
+      { threshold: 0 }).observe(heroEl);
+
+    heroEl.classList.add('fx-on');
+    start();
   })();
 </script>
 </body>
