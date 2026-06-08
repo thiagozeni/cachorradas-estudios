@@ -5,3 +5,5 @@
 _info/
 service_account.json
 *.pem
+__pycache__/
+*.pyc
