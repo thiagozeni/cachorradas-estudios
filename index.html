@@ -14,7 +14,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Barlow:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="imgs/cachorradas-logo-sem-txt.png">
 <meta name="description" content="Cachorradas Estúdios — conteúdo original, intenso e sem filtro toda semana. Canal oficial no YouTube.">
 <meta property="og:title" content="Cachorradas Estúdios">
@@ -33,6 +33,7 @@
     --black3:  #181818;
     --white:   #F0F0F0;
     --dim:     rgba(255,255,255,0.55);
+    --mono:    'Space Mono', ui-monospace, monospace;
   }
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
@@ -670,6 +671,16 @@
     .game-title { font-size:clamp(2.2rem,5vw,4rem); }
     .game-chars img { height:80px; }
   }
+
+  /* ══ MONO DE CONTRAPONTO (rótulos técnicos) ══ */
+  .hero-eyebrow span, .about-eyebrow, .cta-eyebrow, .game-eyebrow,
+  .stat-label, .vcard-cat, .vcard-meta, .game-video-badge, .vcard-badge,
+  .ticker-inner, .section-view-all {
+    font-family:var(--mono);
+  }
+  /* mono é mais largo: alivia o tracking nos rótulos mais espaçados */
+  .hero-eyebrow span, .cta-eyebrow, .stat-label, .vcard-cat { letter-spacing:2.5px; }
+  .ticker-inner { letter-spacing:2px; }
 
   /* ══ HERO WEBGL FX (faíscas + órbita do logo) ══ */
   .hero-fx {
