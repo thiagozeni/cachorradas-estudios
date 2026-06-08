@@ -76,16 +76,34 @@
     100% { top:100%; opacity:0; }
   }
 
-  /* ══ GLITCH no H1 ══ */
-  @keyframes glitch {
-    0%,86%,100% { transform:none; filter:none; }
-    87%  { transform:skewX(-3deg) translateX(-5px); filter:hue-rotate(25deg); }
-    88%  { transform:skewX(2deg)  translateX(4px);  filter:hue-rotate(-15deg); }
-    89%  { transform:none; filter:none; }
-    92%  { transform:skewX(-1deg) translateX(-2px); }
-    93%  { transform:none; }
+  /* ══ GLITCH no H1 (RGB-split + skew, em bursts) ══ */
+  @keyframes glitch-skew {
+    0%,88%,100% { transform:none; }
+    89% { transform:skewX(-2deg) translateX(-3px); }
+    91% { transform:skewX(1.5deg) translateX(3px); }
+    93% { transform:skewX(-1deg) translateX(-1px); }
+    94% { transform:none; }
   }
-  .hero-h1 { animation:glitch 8s ease-in-out infinite; }
+  .hero-h1 { animation:glitch-skew 7s steps(1) infinite; }
+  .hero-h1 .h1-blue, .hero-h1 .h1-magenta { position:relative; }
+  .hero-h1 .h1-blue::before, .hero-h1 .h1-blue::after,
+  .hero-h1 .h1-magenta::before, .hero-h1 .h1-magenta::after {
+    content:attr(data-text); position:absolute; inset:0;
+    pointer-events:none; opacity:0; text-shadow:none;
+  }
+  .hero-h1 .h1-blue::before, .hero-h1 .h1-magenta::before { color:#00e5ff; }  /* ciano */
+  .hero-h1 .h1-blue::after,  .hero-h1 .h1-magenta::after  { color:#ff2bd6; }  /* magenta */
+  .hero-h1 .h1-blue::before    { animation:glitch-rgb 5.5s steps(1) infinite; }
+  .hero-h1 .h1-blue::after     { animation:glitch-rgb 5.5s steps(1) infinite reverse; }
+  .hero-h1 .h1-magenta::before { animation:glitch-rgb 6.3s steps(1) infinite .2s; }
+  .hero-h1 .h1-magenta::after  { animation:glitch-rgb 6.3s steps(1) infinite reverse .2s; }
+  @keyframes glitch-rgb {
+    0%,89%,100% { opacity:0; transform:none; clip-path:inset(0 0 100% 0); }
+    90% { opacity:.85; transform:translate(-3px,-1px); clip-path:inset(15% 0 55% 0); }
+    92% { opacity:.85; transform:translate(3px,1px);   clip-path:inset(58% 0 12% 0); }
+    94% { opacity:.7;  transform:translate(-2px,0);    clip-path:inset(38% 0 33% 0); }
+    96% { opacity:0; }
+  }
 
   /* ══ SHINE nos botões ══ */
   .btn-primary, .btn-outline, .cta-btn, .nav-cta-desktop { position:relative; overflow:hidden; }
@@ -661,6 +679,7 @@
   .hero.fx-on .hero-fx { opacity:1; }
   .hero.fx-on .hero-ring { display:none; }   /* WebGL assume a órbita do logo */
   .hero.fx-on .orb { opacity:.45; }           /* WebGL domina; orbs CSS recuam */
+  .hero.fx-on .hero-scanline { display:none; } /* estática WebGL assume a scanline */
 
   /* ══ SKIP LINK (acessibilidade de teclado) ══ */
   .skip-link {
@@ -746,8 +765,8 @@
       <img src="imgs/cachorradas-logo-sem-txt.png" alt="Logo" width="150" height="150">
     </div>
     <h1 class="hero-h1">
-      <span class="h1-blue">Cachorradas</span>
-      <span class="h1-magenta">Estúdios</span>
+      <span class="h1-blue" data-text="Cachorradas">Cachorradas</span>
+      <span class="h1-magenta" data-text="Estúdios">Estúdios</span>
     </h1>
     <p class="hero-desc">Conteúdo <strong>original, intenso e sem filtro</strong> toda semana. Um estúdio feito para quem não aceita o mediano.</p>
     <div class="hero-btns">
@@ -1085,6 +1104,35 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(W, H, false);
 
+    // ── estática / scanline (shader plane, renderiza atrás das partículas) ──
+    const staticUniforms = { uTime: { value: 0 }, uRes: { value: new THREE.Vector2(W, H) } };
+    const staticPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.ShaderMaterial({
+        uniforms: staticUniforms, transparent: true, depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: `
+          precision mediump float;
+          uniform float uTime; uniform vec2 uRes; varying vec2 vUv;
+          float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+          void main(){
+            vec2 uv = vUv;
+            float grain = hash(floor(uv * uRes * 0.7) + floor(uTime * 22.0));   // estática granulada
+            float scan = 0.5 + 0.5 * sin(uv.y * uRes.y * 2.2);                   // scanlines finas
+            float sweep = smoothstep(0.045, 0.0, abs(uv.y - fract(uTime * 0.06))); // banda que desce
+            vec3 tint = mix(vec3(0.12, 0.62, 0.91), vec3(0.85, 0.12, 0.75), uv.y); // azul→magenta
+            float a = grain * 0.05 + (1.0 - scan) * 0.045 + sweep * 0.20;
+            float vig = smoothstep(0.15, 0.95, distance(uv, vec2(0.5)));          // some no centro (legibilidade)
+            gl_FragColor = vec4(tint, a * mix(0.45, 1.0, vig));
+          }`,
+      })
+    );
+    staticPlane.renderOrder = -1;
+    function placeStatic() { staticPlane.position.set(W / 2, H / 2, -1); staticPlane.scale.set(W, H, 1); }
+    placeStatic();
+    scene.add(staticPlane);
+
     // sprite de glow gerado em runtime (sem asset externo)
     function glowTexture() {
       const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
@@ -1201,6 +1249,7 @@
       if (!running) return;
       const dt = Math.min((now - last) / 1000, 0.05); last = now;
       updatePoints(dt); updateSparks(now);
+      staticUniforms.uTime.value = now * 0.001;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     }
@@ -1215,6 +1264,7 @@
         renderer.setSize(W, H, false);
         camera.right = W; camera.bottom = H; camera.updateProjectionMatrix();
         C = logoCenter();
+        staticUniforms.uRes.value.set(W, H); placeStatic();
       }, 180);
     });
 
