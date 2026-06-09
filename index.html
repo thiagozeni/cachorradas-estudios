@@ -1702,7 +1702,12 @@
       void main(){
         vec2 r = vec2(min((uPlane.x/uPlane.y)/(uImg.x/uImg.y),1.0), min((uPlane.y/uPlane.x)/(uImg.y/uImg.x),1.0));
         vec2 uv = (vUv - 0.5) * r + 0.5;
-        vec3 col = texture2D(tMap, uv).rgb;          // cor original (sem dessaturar)
+        vec3 col = texture2D(tMap, uv).rgb;
+        // ── equalização de cor (grade unificado) ──
+        float lum = dot(col, vec3(0.299, 0.587, 0.114));
+        col = mix(col, vec3(lum), 0.32);                       // -32% saturação → acalma os casts
+        col += vec3(-0.015, 0.005, 0.06) * (1.0 - lum);        // sombras puxam p/ azul frio (split-tone)
+        col = clamp((col - 0.5) * 1.10 + 0.5, 0.0, 1.0);       // leve contraste
         col *= mix(0.35, 1.0, uActive);             // escurece os cards do fundo (profundidade)
         col *= mix(0.62, 1.0, 1.0 - smoothstep(0.30, 0.92, length(vUv - 0.5)));  // vinheta radial sutil
         vec2 pp = (vUv - 0.5) * uPlane;
