@@ -659,15 +659,15 @@
 
   /* ─── COVERFLOW WEBGL dos Últimos Drops (bambolê 3D) — desktop ─── */
   .videos-grid.cf-gl { display:block; position:relative; margin-top:1.5rem; background:none; border:none; }
-  .cf-gl-stage { position:relative; width:100%; height:660px; cursor:grab; }
+  .cf-gl-stage { position:relative; width:100%; height:500px; cursor:grab; }
   .cf-gl-stage.grabbing { cursor:grabbing; }
   .cf-gl-stage canvas { display:block; width:100%; height:100%; }
   .cf-gl-info {
-    position:static; width:100%; text-align:center; padding-bottom:1.1rem; pointer-events:none;
+    position:static; width:100%; text-align:center; padding-bottom:0.5rem; pointer-events:none;
   }
   .cf-gl-info > * { pointer-events:auto; }
   /* durante o carregamento do coverflow: esconde o grid e reserva a altura (evita o flash do grid antigo) */
-  .videos-grid.cf-loading { display:block; position:relative; min-height:760px; background:none; border:none; }
+  .videos-grid.cf-loading { display:block; position:relative; min-height:560px; background:none; border:none; }
   .videos-grid.cf-loading > * { display:none; }
   .cf-gl-info > * { pointer-events:auto; }
   .cf-gl-info .cf-cat { font-family:var(--mono); font-size:.62rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--blue); display:block; margin-bottom:.6rem; }
@@ -1729,7 +1729,7 @@
     const thumbsWrap = root.querySelector('.cf-gl-thumbs');
     stage.appendChild(gl.canvas);
     const camera = new Camera(gl, { fov: 50 });
-    camera.position.z = 5.5;
+    camera.position.z = 4.7;   // câmera mais perto → cards preenchem mais o palco (menos margem morta)
     const scene = new Transform();
     const pivot = new Transform();
     pivot.setParent(scene);
