@@ -741,6 +741,13 @@
   .hero.fx-on .orb { opacity:.45; }           /* WebGL domina; orbs CSS recuam */
   .hero.fx-on .hero-scanline { display:none; } /* estática WebGL assume a scanline */
 
+  /* ══ ABOUT WEBGL FX (plasma vivo dentro do logo) ══ */
+  .about-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3; animation:float 5s ease-in-out infinite; }
+  .about-logo-desktop.fx-on img, .about-logo-mobile.fx-on img { opacity:0; }
+  .about-logo-desktop.fx-on::before, .about-logo-desktop.fx-on::after,
+  .about-logo-mobile.fx-on::before, .about-logo-mobile.fx-on::after { display:none; }
+  @media (prefers-reduced-motion:reduce) { .about-fx { display:none; } }
+
   /* ══ SKIP LINK (acessibilidade de teclado) ══ */
   .skip-link {
     position:absolute; left:-9999px; top:0; z-index:1000;
@@ -1367,6 +1374,115 @@
 
     heroEl.classList.add('fx-on');
     start();
+  })();
+</script>
+
+<script type="module">
+  // ══ About FX: plasma vivo dentro do logo (shader mascarado pelo alpha do logo) ══
+  // Fallback: reduced-motion ou sem WebGL → mantém o logo + anéis CSS.
+  import * as THREE from 'three';
+
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const section = document.querySelector('.section-about');
+    if (!section) return;
+
+    let renderer, canvas, currentWrap = null;
+    try {
+      canvas = document.createElement('canvas');
+      canvas.className = 'about-fx';
+      canvas.setAttribute('aria-hidden', 'true');
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    } catch (e) { return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const uniforms = {
+      uTime: { value: 0 },
+      uLogo: { value: null },
+      uImgAspect: { value: 300 / 352 }, // logo retrato
+    };
+    const mat = new THREE.ShaderMaterial({
+      uniforms, transparent: true, depthWrite: false,
+      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }`,
+      fragmentShader: `
+        precision highp float;
+        uniform float uTime; uniform sampler2D uLogo; uniform float uImgAspect;
+        varying vec2 vUv;
+        float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+        float noise(vec2 p){ vec2 i=floor(p), f=fract(p);
+          float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+          vec2 u=f*f*(3.0-2.0*f); return mix(mix(a,b,u.x),mix(c,d,u.x),u.y); }
+        float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.02; a*=0.5; } return v; }
+        void main(){
+          // contain do logo retrato num canvas quadrado
+          float ia = uImgAspect;
+          vec2 t = vec2((vUv.x-(1.0-ia)*0.5)/ia, vUv.y);
+          if (t.x<0.0||t.x>1.0){ gl_FragColor=vec4(0.0); return; }
+          vec4 logo = texture2D(uLogo, t);
+          if (logo.a < 0.02){ gl_FragColor=vec4(0.0); return; }
+
+          // plasma líquido (domain warping)
+          vec2 q = vUv*3.0;
+          float tt = uTime*0.22;
+          vec2 warp = vec2(fbm(q + vec2(0.0,tt)), fbm(q + vec2(tt,0.0)));
+          float n = smoothstep(0.15, 0.95, fbm(q + warp*1.6));
+
+          vec3 base = logo.rgb;
+          float energy = pow(n, 1.5);
+          vec3 neon = mix(vec3(0.118,0.624,0.910), vec3(0.847,0.122,0.749), n);
+          vec3 col = base * (0.85 + 0.9*energy);                 // sempre vibrante; picos brilhantes
+          col += base * energy * energy * 0.8;                   // bloom nas cristas
+          col = mix(col, neon, 0.22);                            // fluxo neon líquido
+          float sheen = smoothstep(0.0,0.5, sin((vUv.x+vUv.y)*4.0 - uTime*1.2)*0.5+0.5);
+          col += neon * sheen * 0.3 * energy;                    // faixa de brilho percorrendo
+          col *= 0.92 + 0.14*sin(uTime*1.6 + n*6.2831);          // pulso
+
+          gl_FragColor = vec4(col, logo.a);
+        }`,
+    });
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+
+    function visibleWrap() {
+      const d = section.querySelector('.about-logo-desktop');
+      const m = section.querySelector('.about-logo-mobile');
+      if (d && d.offsetParent !== null) return d;
+      if (m && m.offsetParent !== null) return m;
+      return null;
+    }
+    function sizeTo(w) { const s = Math.round(w.clientWidth); renderer.setSize(s, s, false); }
+    function attach() {
+      const w = visibleWrap();
+      if (!w) return;
+      if (w !== currentWrap) {
+        if (currentWrap) currentWrap.classList.remove('fx-on');
+        w.appendChild(canvas);
+        w.classList.add('fx-on');
+        currentWrap = w;
+      }
+      sizeTo(w);
+    }
+
+    let raf, running = false;
+    function tick(now) {
+      if (!running) return;
+      uniforms.uTime.value = now * 0.001;
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tick);
+    }
+    function start() { if (running) return; running = true; raf = requestAnimationFrame(tick); }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+
+    new THREE.TextureLoader().load('imgs/cachorradas-logo-removebg.png', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      uniforms.uLogo.value = tex;
+      attach();
+      let rt;
+      window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(attach, 180); });
+      new IntersectionObserver((es) => es.forEach((e) => (e.isIntersecting ? start() : stop())),
+        { threshold: 0.1 }).observe(section);
+    });
   })();
 </script>
 </body>
