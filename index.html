@@ -400,8 +400,9 @@
 
   /* ══ ABOUT ══ */
   .section-about { background:var(--black); padding:3rem 1.5rem; }
+  .about-visual-col { display:none; } /* coluna visual é desktop-only (vira flex no @media 960) */
   .about-logo-mobile {
-    width:160px; height:160px; margin:0 auto 2.2rem;
+    width:184px; height:184px; margin:0 auto 2.2rem;
     display:flex; align-items:center; justify-content:center; position:relative;
   }
   .about-logo-mobile img {
@@ -566,7 +567,7 @@
       background-size:40px 40px;
     }
     .about-logo-desktop {
-      width:260px; height:260px; position:relative; z-index:2;
+      width:300px; height:300px; position:relative; z-index:2;
       display:flex; align-items:center; justify-content:center;
     }
     .about-logo-desktop img {
@@ -742,11 +743,14 @@
   .hero.fx-on .hero-scanline { display:none; } /* estática WebGL assume a scanline */
 
   /* ══ ABOUT WEBGL FX (plasma vivo dentro do logo) ══ */
-  .about-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3; animation:float 5s ease-in-out infinite; }
+  .about-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3; }
   .about-logo-desktop.fx-on img, .about-logo-mobile.fx-on img { opacity:0; }
   .about-logo-desktop.fx-on::before, .about-logo-desktop.fx-on::after,
   .about-logo-mobile.fx-on::before, .about-logo-mobile.fx-on::after { display:none; }
-  @media (prefers-reduced-motion:reduce) { .about-fx { display:none; } }
+  /* grid com pulsos de fibra óptica (desktop) */
+  .about-grid { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+  .about-visual-col.grid-fx-on::before { display:none; }
+  @media (prefers-reduced-motion:reduce) { .about-fx, .about-grid { display:none; } }
 
   /* ══ SKIP LINK (acessibilidade de teclado) ══ */
   .skip-link {
@@ -1034,6 +1038,7 @@
   </div>
   <!-- Desktop only visual col -->
   <div class="about-visual-col">
+    <canvas class="about-grid" aria-hidden="true"></canvas>
     <div class="about-logo-desktop">
       <img src="imgs/cachorradas-logo-removebg.png" alt="Cachorradas Estúdios">
     </div>
@@ -1425,19 +1430,19 @@
 
           // plasma líquido (domain warping)
           vec2 q = vUv*3.0;
-          float tt = uTime*0.22;
+          float tt = uTime*0.34;
           vec2 warp = vec2(fbm(q + vec2(0.0,tt)), fbm(q + vec2(tt,0.0)));
-          float n = smoothstep(0.15, 0.95, fbm(q + warp*1.6));
+          float n = smoothstep(0.12, 0.95, fbm(q + warp*1.8));
 
           vec3 base = logo.rgb;
-          float energy = pow(n, 1.5);
+          float energy = pow(n, 1.3);
           vec3 neon = mix(vec3(0.118,0.624,0.910), vec3(0.847,0.122,0.749), n);
-          vec3 col = base * (0.85 + 0.9*energy);                 // sempre vibrante; picos brilhantes
-          col += base * energy * energy * 0.8;                   // bloom nas cristas
-          col = mix(col, neon, 0.22);                            // fluxo neon líquido
-          float sheen = smoothstep(0.0,0.5, sin((vUv.x+vUv.y)*4.0 - uTime*1.2)*0.5+0.5);
-          col += neon * sheen * 0.3 * energy;                    // faixa de brilho percorrendo
-          col *= 0.92 + 0.14*sin(uTime*1.6 + n*6.2831);          // pulso
+          vec3 col = base * (0.9 + 1.5*energy);                  // bem vibrante; picos brilhantes
+          col += base * energy * energy * 1.2;                   // bloom forte nas cristas
+          col = mix(col, neon, 0.30);                            // fluxo neon líquido presente
+          float sheen = smoothstep(0.0,0.45, sin((vUv.x+vUv.y)*4.5 - uTime*2.0)*0.5+0.5);
+          col += neon * sheen * 0.6 * (0.4+energy);              // faixa de brilho percorrendo
+          col *= 0.9 + 0.22*sin(uTime*2.2 + n*6.2831);           // pulso marcado
 
           gl_FragColor = vec4(col, logo.a);
         }`,
@@ -1483,6 +1488,92 @@
       new IntersectionObserver((es) => es.forEach((e) => (e.isIntersecting ? start() : stop())),
         { threshold: 0.1 }).observe(section);
     });
+  })();
+</script>
+
+<script type="module">
+  // ══ About FX: grid com pulsos de fibra óptica correndo nas linhas (desktop) ══
+  import * as THREE from 'three';
+
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const col = document.querySelector('.about-visual-col');
+    const section = document.querySelector('.section-about');
+    const canvas = document.querySelector('.about-grid');
+    if (!col || !section || !canvas) return;
+    const desktop = window.matchMedia('(min-width: 960px)');
+
+    let renderer, scene, camera, uniforms, ready = false, running = false, raf, sectionVisible = false;
+
+    function init() {
+      if (ready) return true;
+      try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); }
+      catch (e) { return false; }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      scene = new THREE.Scene();
+      camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      uniforms = { uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) } };
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+        uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+        vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`,
+        fragmentShader: `
+          precision highp float;
+          uniform float uTime; uniform vec2 uRes; varying vec2 vUv;
+          float h11(float p){ p=fract(p*0.1031); p*=p+33.33; p*=p+p; return fract(p); }
+          void main(){
+            vec2 px = vUv * uRes;
+            float cell = 40.0;
+            vec2 fp = fract(px/cell);
+            vec2 d = min(fp, 1.0-fp) * cell;             // dist às linhas (px)
+            float vL = smoothstep(1.4, 0.0, d.x);
+            float hL = smoothstep(1.4, 0.0, d.y);
+            vec3 col = vec3(0.118,0.624,0.910) * 0.05 * (vL + hL);  // grid base sutil
+            // pulsos verticais (descem pelas verticais)
+            float ci = floor(px.x/cell + 0.5);
+            float tt = uTime*(0.18+h11(ci)*0.4) + h11(ci*1.7)*10.0;
+            float head = fract(tt) * uRes.y;
+            float act = step(0.62, h11(ci*3.1 + floor(tt)));     // ativação intermitente/aleatória
+            float dy = head - px.y;
+            float tv = exp(-max(dy,0.0)/75.0) * exp(-max(-dy,0.0)/6.0); // cauda atrás + frente nítida
+            col += vec3(0.5,0.9,1.0) * (act * vL * tv) * 1.7;    // pulso ciano
+            // pulsos horizontais (correm nas horizontais)
+            float ri = floor(px.y/cell + 0.5);
+            float th = uTime*(0.18+h11(ri+71.0)*0.4) + h11(ri*1.3+13.0)*10.0;
+            float headH = fract(th) * uRes.x;
+            float actH = step(0.62, h11(ri*3.7 + 40.0 + floor(th)));
+            float dx = headH - px.x;
+            float thh = exp(-max(dx,0.0)/75.0) * exp(-max(-dx,0.0)/6.0);
+            col += vec3(1.0,0.35,0.9) * (actH * hL * thh) * 1.7; // pulso magenta
+            gl_FragColor = vec4(col, 1.0);
+          }`,
+      })));
+      ready = true; return true;
+    }
+
+    function resize() {
+      const w = Math.round(col.clientWidth), h = Math.round(col.clientHeight);
+      renderer.setSize(w, h, false);
+      uniforms.uRes.value.set(w, h);
+    }
+    function tick(now) {
+      if (!running) return;
+      uniforms.uTime.value = now * 0.001;
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tick);
+    }
+    function start() {
+      if (running || !desktop.matches || !sectionVisible) return;
+      if (!init()) return;
+      resize(); col.classList.add('grid-fx-on'); running = true; raf = requestAnimationFrame(tick);
+    }
+    function stop() { running = false; cancelAnimationFrame(raf); col.classList.remove('grid-fx-on'); }
+
+    window.addEventListener('resize', () => { if (running) resize(); });
+    desktop.addEventListener('change', (e) => { e.matches ? start() : stop(); });
+    new IntersectionObserver((es) => es.forEach((e) => {
+      sectionVisible = e.isIntersecting;
+      sectionVisible ? start() : stop();
+    }), { threshold: 0.05 }).observe(section);
   })();
 </script>
 </body>
