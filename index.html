@@ -1256,11 +1256,13 @@
     if (!heroEl || !canvas) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    const mobile = window.innerWidth < 700;       // mobile: 1 canvas, menos partículas, DPR menor
     const canvasFront = document.getElementById('heroFxFront');
     let renderer, rendererFront;
     try {
       renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      rendererFront = canvasFront ? new THREE.WebGLRenderer({ canvas: canvasFront, alpha: true, antialias: true }) : null;
+      // no mobile NÃO cria o canvas da frente → render em 1 passe só (economia de bateria/CPU)
+      rendererFront = (!mobile && canvasFront) ? new THREE.WebGLRenderer({ canvas: canvasFront, alpha: true, antialias: true }) : null;
     } catch (e) { return; } // sem WebGL → mantém CSS
 
     const BLUE = new THREE.Color(0x1E9FE8);
@@ -1270,7 +1272,7 @@
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(0, W, 0, H, -1000, 1000); // origem top-left, y p/ baixo
     camera.position.z = 10;
-    const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    const DPR = Math.min(window.devicePixelRatio || 1, mobile ? 1.0 : 1.5);
     renderer.setPixelRatio(DPR); renderer.setSize(W, H, false);
     if (rendererFront) { rendererFront.setPixelRatio(DPR); rendererFront.setSize(W, H, false); }
 
@@ -1329,7 +1331,7 @@
     let C = logoCenter();
 
     // ── partículas orbitais em 3D ──
-    const N = Math.round(Math.max(110, Math.min(240, Math.floor(W * H / 7500))) * 1.4); // +40% de volume
+    const N = Math.round(Math.max(110, Math.min(240, Math.floor(W * H / 7500))) * 1.4 * (mobile ? 0.5 : 1)); // +40%; metade no mobile
     const positions = new Float32Array(N * 3);
     const aColor = new Float32Array(N * 3);
     const aSize = new Float32Array(N);
@@ -1415,22 +1417,29 @@
       }
       aAlphaAttr.needsUpdate = true;
     }
+    function applyAll() {  // mobile: todas as partículas no único canvas
+      for (let i = 0; i < N; i++) aAlpha[i] = baseAlpha[i];
+      aAlphaAttr.needsUpdate = true;
+    }
     let raf, last = performance.now(), running = false;
     function tick(now) {
       if (!running) return;
       const dt = Math.min((now - last) / 1000, 0.05); last = now;
       updatePoints(dt);
       staticUniforms.uTime.value = now * 0.001;
-      // camada de trás: estática + partículas com profundidade <= 0 (atrás do logo)
       staticPlane.visible = true;
-      applySide(false);
-      renderer.render(scene, camera);
-      // camada da frente: só partículas com profundidade > 0 (passam na frente do logo)
       if (rendererFront) {
+        // desktop: 2 passes — trás (profundidade<=0) e frente (profundidade>0, na frente do logo)
+        applySide(false);
+        renderer.render(scene, camera);
         staticPlane.visible = false;
         applySide(true);
         rendererFront.render(scene, camera);
         staticPlane.visible = true;
+      } else {
+        // mobile: 1 canvas, todas as partículas num passe só
+        applyAll();
+        renderer.render(scene, camera);
       }
       raf = requestAnimationFrame(tick);
     }
