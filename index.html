@@ -1728,6 +1728,9 @@
     const navWrap = root.querySelector('.cf-gl-nav');
     const thumbsWrap = root.querySelector('.cf-gl-thumbs');
     stage.appendChild(gl.canvas);
+    // setas/miniaturas dentro do palco → posicionam pelo centro do carrossel, não do componente
+    stage.appendChild(navWrap);
+    stage.appendChild(thumbsWrap);
     const camera = new Camera(gl, { fov: 50 });
     camera.position.z = 4.7;   // câmera mais perto → cards preenchem mais o palco (menos margem morta)
     const scene = new Transform();
@@ -1735,7 +1738,7 @@
     pivot.setParent(scene);
     const geometry = new Plane(gl, { widthSegments: 24, heightSegments: 1 });
 
-    const PW = 6.08, PH = 3.42, OFFSET_X = 0;   // centralizado no palco + 50% maior, sem inclinação
+    const PW = 5.96, PH = 3.35, OFFSET_X = 0;   // centralizado, sem inclinação (−2% p/ não encostar nas setas)
     const REP = 2;
     const ring = [];
     for (let r = 0; r < REP; r++) items.forEach((it, pi) => ring.push({ src: it.src, proj: pi }));
