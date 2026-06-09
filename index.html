@@ -1704,6 +1704,7 @@
         vec2 uv = (vUv - 0.5) * r + 0.5;
         vec3 col = texture2D(tMap, uv).rgb;          // cor original (sem dessaturar)
         col *= mix(0.35, 1.0, uActive);             // escurece os cards do fundo (profundidade)
+        col *= mix(0.62, 1.0, 1.0 - smoothstep(0.30, 0.92, length(vUv - 0.5)));  // vinheta radial sutil
         vec2 pp = (vUv - 0.5) * uPlane;
         float d = sdRound(pp, uPlane * 0.5, 0.16);
         float alpha = (1.0 - smoothstep(0.0, 0.018, d)) * uVis;
