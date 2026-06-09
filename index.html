@@ -230,7 +230,7 @@
 
   /* Logo ring widget */
   .hero-logo-wrap {
-    position:relative; z-index:2; width:150px; height:150px;
+    position:relative; z-index:2; width:173px; height:173px;
     margin:0 auto 2rem; display:flex; align-items:center; justify-content:center;
   }
   .hero-logo-wrap img {
@@ -485,7 +485,7 @@
     .nav-cta-desktop:hover { box-shadow:0 0 34px rgba(216,31,191,.7); }
 
     .hero { padding:4rem 2.5rem; }
-    .hero-logo-wrap { width:190px; height:190px; }
+    .hero-logo-wrap { width:219px; height:219px; }
     .hr1 { width:190px; height:190px; }
     .hr2 { width:230px; height:230px; }
     .hero-btns { flex-direction:row; max-width:none; }
@@ -526,7 +526,7 @@
     .hero-eyebrow { justify-content:flex-start; }
     .hero-h1 { font-size:clamp(5rem,7.5vw,8rem); }
     .hero-btns { flex-direction:row; max-width:none; }
-    .hero-logo-wrap { width:300px; height:300px; margin:0 auto; }
+    .hero-logo-wrap { width:345px; height:345px; margin:0 auto; }
     .hr1 { width:300px; height:300px; }
     .hr2 { width:360px; height:360px; }
     .hero-content-col { order:1; }
@@ -1291,7 +1291,7 @@
     let C = logoCenter();
 
     // ── partículas orbitais em 3D ──
-    const N = Math.max(110, Math.min(240, Math.floor(W * H / 7500)));
+    const N = Math.round(Math.max(110, Math.min(240, Math.floor(W * H / 7500))) * 1.4); // +40% de volume
     const positions = new Float32Array(N * 3);
     const aColor = new Float32Array(N * 3);
     const aSize = new Float32Array(N);
