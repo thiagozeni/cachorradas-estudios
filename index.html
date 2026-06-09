@@ -1519,7 +1519,7 @@
             float act = step(0.62, h11(ci*3.1 + floor(tt)));     // ativação intermitente/aleatória
             float dy = head - px.y;
             float tv = exp(-max(dy,0.0)/75.0) * exp(-max(-dy,0.0)/6.0); // cauda atrás + frente nítida
-            col += vec3(0.5,0.9,1.0) * (act * vL * tv) * 1.7 * falloff;    // pulso ciano
+            col += vec3(0.118,0.624,0.910) * (act * vL * tv) * 1.53 * falloff;    // pulso azul (cor do site)
             // pulsos horizontais (correm nas horizontais)
             float ri = floor(px.y/cell + 0.5);
             float th = uTime*(0.18+h11(ri+71.0)*0.4) + h11(ri*1.3+13.0)*10.0;
@@ -1527,7 +1527,7 @@
             float actH = step(0.62, h11(ri*3.7 + 40.0 + floor(th)));
             float dx = headH - px.x;
             float thh = exp(-max(dx,0.0)/75.0) * exp(-max(-dx,0.0)/6.0);
-            col += vec3(1.0,0.35,0.9) * (actH * hL * thh) * 1.7 * falloff; // pulso magenta
+            col += vec3(1.0,0.35,0.9) * (actH * hL * thh) * 1.53 * falloff; // pulso magenta
             gl_FragColor = vec4(col, 1.0);
           }`,
       })));
