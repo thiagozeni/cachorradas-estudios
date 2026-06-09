@@ -1298,31 +1298,17 @@
     const aAlpha = new Float32Array(N);
     const baseAlpha = new Float32Array(N); // opacidade-alvo por profundidade (split frente/trás no tick)
     const lzArr = new Float32Array(N);     // profundidade da partícula no frame atual
-    // ── elétrons em anéis orbitais definidos (modelo atômico), não nuvem caótica ──
     const orb = [];
-    const RINGS = 6;
-    const GOLDEN = 2.399963;                        // golden angle → orientações 3D bem espalhadas
-    const ringDef = [];
-    for (let k = 0; k < RINGS; k++) {
-      ringDef.push({
-        inc: (k + 0.5) / RINGS * Math.PI,          // inclinações distribuídas (0..π)
-        node: k * GOLDEN,                          // orienta cada anel no espaço 3D
-        rad: 0.82 + (k % 3) * 0.17,                // 3 camadas de raio (cascas)
-        speed: (0.26 + (k % 3) * 0.07) * (k % 2 ? 1 : -1), // velocidade por anel, sentidos alternados
-      });
-    }
-    const perRing = Math.ceil(N / RINGS);
     for (let i = 0; i < N; i++) {
-      const k = i % RINGS, rdef = ringDef[k], idx = Math.floor(i / RINGS);
       orb.push({
-        a: (idx / perRing) * Math.PI * 2,          // elétrons espaçados uniformemente no anel
-        speed: rdef.speed,                         // todos do anel correm juntos → trilha organizada
-        rad: rdef.rad,
-        inc: rdef.inc,
-        node: rdef.node,
-        base: 5.5 + (k % 2) * 1.5,                 // tamanho leve por anel
+        a: Math.random() * Math.PI * 2,
+        speed: (0.10 + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1),
+        rad: 0.72 + Math.random() * 0.75,          // raio orbital (× C.R)
+        inc: Math.random() * Math.PI,              // inclinação do plano orbital
+        node: Math.random() * Math.PI * 2,         // rotação do nó (orienta a órbita no espaço)
+        base: 5 + Math.random() * 5,               // tamanho base
       });
-      const c = (k % 2 === 0) ? BLUE : MAG;        // cor por anel → trilhas de cor definidas
+      const c = Math.random() < 0.5 ? BLUE : MAG;
       aColor[i*3] = c.r; aColor[i*3+1] = c.g; aColor[i*3+2] = c.b;
     }
     const geo = new THREE.BufferGeometry();
@@ -1349,42 +1335,6 @@
         }`,
     }));
     scene.add(points);
-
-    // ── trilhas dos anéis (órbitas visíveis = modelo atômico) ──
-    const TSEG = 96;
-    const trackGeoms = ringDef.map(() => {
-      const g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(TSEG * 3), 3));
-      return g;
-    });
-    const tracks = ringDef.map((rdef, k) => {
-      const loop = new THREE.LineLoop(trackGeoms[k], new THREE.LineBasicMaterial({
-        color: (k % 2 === 0) ? BLUE : MAG, transparent: true, opacity: 0.16,
-        blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false,
-      }));
-      scene.add(loop);
-      return loop;
-    });
-    const setTracksVisible = (v) => tracks.forEach((t) => { t.visible = v; });
-    function updateTracks() {
-      const FOCAL = C.R * 2.6;
-      for (let k = 0; k < ringDef.length; k++) {
-        const rdef = ringDef[k];
-        const ci = Math.cos(rdef.inc), si = Math.sin(rdef.inc);
-        const cn = Math.cos(rdef.node), sn = Math.sin(rdef.node);
-        const r = C.R * rdef.rad, arr = trackGeoms[k].attributes.position.array;
-        for (let s = 0; s < TSEG; s++) {
-          const a = s / TSEG * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
-          const lx0 = r * ca, ly0 = r * sa * ci, lz0 = r * sa * si;
-          const lx = lx0 * cn + lz0 * sn, lz = -lx0 * sn + lz0 * cn;
-          const scale = FOCAL / (FOCAL - lz);
-          arr[s * 3] = C.x + lx * scale + mx;
-          arr[s * 3 + 1] = C.y + ly0 * scale + my;
-          arr[s * 3 + 2] = 0;
-        }
-        trackGeoms[k].attributes.position.needsUpdate = true;
-      }
-    }
 
     // ── parallax de mouse ──
     let mx = 0, my = 0;
@@ -1432,18 +1382,17 @@
       if (!running) return;
       const dt = Math.min((now - last) / 1000, 0.05); last = now;
       updatePoints(dt);
-      updateTracks();
       staticUniforms.uTime.value = now * 0.001;
-      // camada de trás: estática + trilhas dos anéis + partículas com profundidade <= 0
-      staticPlane.visible = true; setTracksVisible(true);
+      // camada de trás: estática + partículas com profundidade <= 0 (atrás do logo)
+      staticPlane.visible = true;
       applySide(false);
       renderer.render(scene, camera);
       // camada da frente: só partículas com profundidade > 0 (passam na frente do logo)
       if (rendererFront) {
-        staticPlane.visible = false; setTracksVisible(false);
+        staticPlane.visible = false;
         applySide(true);
         rendererFront.render(scene, camera);
-        staticPlane.visible = true; setTracksVisible(true);
+        staticPlane.visible = true;
       }
       raf = requestAnimationFrame(tick);
     }
