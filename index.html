@@ -1527,7 +1527,9 @@
             vec2 d = min(fp, 1.0-fp) * cell;             // dist às linhas (px)
             float vL = smoothstep(1.4, 0.0, d.x);
             float hL = smoothstep(1.4, 0.0, d.y);
-            vec3 col = vec3(0.118,0.624,0.910) * 0.05 * (vL + hL);  // grid base sutil
+            // linhas mais sutis com gradiente horizontal: 50% nas laterais → 25% no centro
+            float lineAtten = mix(0.25, 0.5, abs(vUv.x - 0.5) * 2.0);
+            vec3 col = vec3(0.118,0.624,0.910) * 0.05 * lineAtten * (vL + hL);
             // pulsos verticais (descem pelas verticais)
             float ci = floor(px.x/cell + 0.5);
             float tt = uTime*(0.18+h11(ci)*0.4) + h11(ci*1.7)*10.0;
