@@ -657,6 +657,32 @@
     .game-chars img { height:80px; }
   }
 
+  /* ─── COVERFLOW WEBGL dos Últimos Drops (bambolê 3D) — desktop ─── */
+  .videos-grid.cf-gl { display:block; position:relative; margin-top:1.5rem; background:none; border:none; }
+  .cf-gl-stage { position:relative; width:100%; height:560px; cursor:grab; }
+  .cf-gl-stage.grabbing { cursor:grabbing; }
+  .cf-gl-stage canvas { display:block; width:100%; height:100%; }
+  .cf-gl-info {
+    position:absolute; left:0; top:50%; transform:translateY(calc(-50% - 140px));
+    width:42%; max-width:440px; z-index:6; text-align:left; pointer-events:none;
+  }
+  .cf-gl-info > * { pointer-events:auto; }
+  .cf-gl-info .cf-cat { font-family:var(--mono); font-size:.62rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--blue); display:block; margin-bottom:.6rem; }
+  .cf-gl-info .cf-title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic; text-transform:uppercase; line-height:1.0; font-size:clamp(1.6rem,3.2vw,2.8rem); color:var(--white); margin-bottom:1.1rem; }
+  .cf-gl-info .cf-cta { font-family:var(--mono); font-weight:700; font-size:.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--magenta); text-decoration:none; border-bottom:1px solid var(--magenta); padding-bottom:3px; }
+  .cf-gl-nav { position:absolute; right:1rem; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:12px; z-index:6; }
+  .cf-gl-nav button {
+    width:46px; height:46px; border-radius:50%; display:grid; place-items:center;
+    background:rgba(10,10,10,.82); border:1px solid rgba(30,159,232,.5); color:var(--blue);
+    font-family:'Barlow Condensed',sans-serif; font-size:1.3rem; line-height:1; cursor:pointer;
+    backdrop-filter:blur(6px); transition:background .3s, border-color .3s, transform .2s;
+  }
+  .cf-gl-nav button:hover { background:var(--blue); color:#000; transform:scale(1.08); }
+  .cf-gl-thumbs { position:absolute; bottom:.4rem; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:6; }
+  .cf-gl-thumb { width:50px; height:28px; border-radius:3px; overflow:hidden; padding:0; opacity:.4; cursor:pointer; border:1px solid transparent; transition:opacity .3s, border-color .3s; background:none; }
+  .cf-gl-thumb.on { opacity:1; border-color:var(--magenta); }
+  .cf-gl-thumb img { width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(1); }
+
   /* ══ UNIVERSO (séries / arcos) ══ */
   .section-universo { padding:3rem 1.2rem; background:var(--black); border-top:1px solid rgba(30,159,232,.15); }
   .universo-list { display:flex; flex-direction:column; gap:2.4rem; margin-top:1.8rem; }
@@ -1618,6 +1644,182 @@
       sectionVisible = e.isIntersecting;
       sectionVisible ? start() : stop();
     }), { threshold: 0.05 }).observe(section);
+  })();
+</script>
+
+<script type="module">
+  // ══ Coverflow WebGL dos Últimos Drops (bambolê 3D, OGL) — desktop; fallback = grid ══
+  (async function () {
+    const root = document.querySelector('.videos-grid');
+    if (!root || window.innerWidth < 960) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let OGL;
+    try { OGL = await import('https://esm.sh/ogl@1.0.11'); }
+    catch (e) { console.warn('OGL falhou ao carregar', e); return; }
+    const { Renderer, Camera, Transform, Plane, Mesh, Program, Texture } = OGL;
+
+    const cards = [...root.querySelectorAll('.vcard')];
+    const items = cards.map((c) => ({
+      src: c.querySelector('.vcard-thumb img')?.getAttribute('src'),
+      title: c.querySelector('.vcard-title')?.textContent.trim(),
+      cat: c.querySelector('.vcard-cat')?.textContent.trim(),
+      href: c.getAttribute('href'),
+    })).filter((it) => it.src);
+    if (items.length < 2) return;
+
+    const vertex = `
+      attribute vec3 position; attribute vec2 uv;
+      uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix; uniform float uSpeed; uniform float uPW; uniform float uR;
+      varying vec2 vUv;
+      void main(){ vUv = uv; vec3 p = position;
+        float xw = position.x * uPW; float th = xw / uR;
+        p.x = (uR * sin(th)) / uPW; p.z = (uR * cos(th) - uR);
+        p.z += sin(uv.x * 3.14159265) * uSpeed * 3.0;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }`;
+    const fragment = `
+      precision highp float;
+      uniform sampler2D tMap; uniform vec2 uImg; uniform vec2 uPlane; uniform float uActive; uniform float uVis;
+      varying vec2 vUv;
+      float sdRound(vec2 p, vec2 b, float r){ vec2 d = abs(p) - b + r; return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r; }
+      void main(){
+        vec2 r = vec2(min((uPlane.x/uPlane.y)/(uImg.x/uImg.y),1.0), min((uPlane.y/uPlane.x)/(uImg.y/uImg.x),1.0));
+        vec2 uv = (vUv - 0.5) * r + 0.5;
+        vec3 col = texture2D(tMap, uv).rgb;
+        float l = dot(col, vec3(0.299,0.587,0.114));
+        col = mix(vec3(l), col, 0.4);               // dessatura p/ casar com o site
+        col *= mix(0.35, 1.0, uActive);             // escurece os cards do fundo
+        vec2 pp = (vUv - 0.5) * uPlane;
+        float d = sdRound(pp, uPlane * 0.5, 0.16);
+        float alpha = (1.0 - smoothstep(0.0, 0.018, d)) * uVis;
+        gl_FragColor = vec4(col, alpha); }`;
+
+    // cria o contexto WebGL ANTES de tocar no grid — se falhar, o grid original fica intacto
+    let renderer, gl;
+    try { renderer = new Renderer({ alpha: true, dpr: Math.min(devicePixelRatio, 2) }); gl = renderer.gl; }
+    catch (e) { return; }
+    if (!gl) return;
+
+    // pré-carrega as thumbnails; se QUALQUER uma falhar (CORS/404), mantém o grid intacto
+    const loaded = await Promise.all(items.map((it) => new Promise((res) => {
+      const im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = () => res(im); im.onerror = () => res(null);
+      im.src = it.src;
+    })));
+    if (loaded.some((im) => !im)) return;
+    items.forEach((it, i) => { it.img = loaded[i]; });
+
+    // contexto + texturas OK → só agora assume o grid (substitui o conteúdo)
+    root.classList.add('cf-gl');
+    root.innerHTML = '<div class="cf-gl-stage"></div><div class="cf-gl-info"></div><div class="cf-gl-nav"></div><div class="cf-gl-thumbs"></div>';
+    const stage = root.querySelector('.cf-gl-stage');
+    const info = root.querySelector('.cf-gl-info');
+    const navWrap = root.querySelector('.cf-gl-nav');
+    const thumbsWrap = root.querySelector('.cf-gl-thumbs');
+    stage.appendChild(gl.canvas);
+    const camera = new Camera(gl, { fov: 50 });
+    camera.position.z = 5.5;
+    const scene = new Transform();
+    scene.rotation.z = Math.PI / 180 * 10;
+    const pivot = new Transform();
+    pivot.setParent(scene);
+    pivot.rotation.y = Math.PI / 180 * 12;
+    const geometry = new Plane(gl, { widthSegments: 24, heightSegments: 1 });
+
+    const PW = 4.05, PH = 2.28, OFFSET_X = 1.35;
+    const REP = 2;
+    const ring = [];
+    for (let r = 0; r < REP; r++) items.forEach((it, pi) => ring.push({ src: it.src, proj: pi }));
+    const N = ring.length;
+    const ANGLE = (2 * Math.PI) / N;
+    const R = (PW / ANGLE) * 1.09;
+    pivot.position.set(OFFSET_X, 0, -R);
+
+    ring.forEach((it) => {
+      const program = new Program(gl, { vertex, fragment, transparent: true, cullFace: false, uniforms: {
+        tMap: { value: new Texture(gl) }, uSpeed: { value: 0 }, uActive: { value: 0 }, uVis: { value: 1 },
+        uImg: { value: [16, 9] }, uPlane: { value: [PW, PH] }, uPW: { value: PW }, uR: { value: R }
+      } });
+      const im = items[it.proj].img; // imagem já pré-carregada
+      program.uniforms.tMap.value.image = im;
+      program.uniforms.uImg.value = [im.naturalWidth, im.naturalHeight];
+      const mesh = new Mesh(gl, { geometry, program });
+      mesh.scale.set(PW, PH, 1);
+      mesh.setParent(pivot);
+      mesh.program = program;
+    });
+    const medias = pivot.children.map((mesh) => ({ mesh, program: mesh.program }));
+
+    const scroll = { current: 0, target: 0, last: 0, ease: 0.09 };
+    let speed = 0, centerIdx = -1;
+    function goProj(pi) {
+      const cur = ((scroll.target % N) + N) % N;
+      let best = scroll.target, bestAbs = Infinity;
+      for (let r = 0; r < REP; r++) {
+        const k = pi + r * items.length;
+        let d = k - cur; if (d > N / 2) d -= N; if (d < -N / 2) d += N;
+        if (Math.abs(d) < bestAbs) { bestAbs = Math.abs(d); best = scroll.target + d; }
+      }
+      scroll.target = Math.round(best);
+    }
+
+    const mkBtn = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.addEventListener('click', fn); navWrap.appendChild(b); };
+    mkBtn('‹', () => { scroll.target -= 1; });
+    mkBtn('›', () => { scroll.target += 1; });
+    items.forEach((it, i) => {
+      const t = document.createElement('button'); t.className = 'cf-gl-thumb';
+      const tim = document.createElement('img'); tim.src = it.src; tim.alt = ''; t.appendChild(tim);
+      t.addEventListener('click', () => goProj(i));
+      thumbsWrap.appendChild(t);
+    });
+
+    function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h); camera.perspective({ aspect: w / h }); }
+    resize(); window.addEventListener('resize', resize);
+
+    stage.addEventListener('wheel', (e) => { scroll.target += (e.deltaY + e.deltaX) * 0.0016; }, { passive: true });
+    let down = false, sx = 0, ss = 0;
+    stage.addEventListener('pointerdown', (e) => { down = true; sx = e.clientX; ss = scroll.target; stage.classList.add('grabbing'); });
+    window.addEventListener('pointermove', (e) => { if (!down) return; scroll.target = ss + (sx - e.clientX) * 0.0055; });
+    window.addEventListener('pointerup', () => { if (!down) return; down = false; stage.classList.remove('grabbing'); scroll.target = Math.round(scroll.target); });
+
+    function setInfo(i) {
+      const it = items[i];
+      info.replaceChildren();
+      const cat = document.createElement('span'); cat.className = 'cf-cat'; cat.textContent = it.cat || '';
+      const title = document.createElement('div'); title.className = 'cf-title'; title.textContent = it.title || '';
+      info.append(cat, title);
+      if (it.href && /^https?:\/\//.test(it.href)) { // só links http(s) → evita javascript: etc.
+        const a = document.createElement('a');
+        a.className = 'cf-cta'; a.target = '_blank'; a.rel = 'noopener';
+        a.href = it.href; a.textContent = 'Assistir no YouTube →';
+        info.append(a);
+      }
+      [...thumbsWrap.children].forEach((t, k) => t.classList.toggle('on', k === i));
+    }
+
+    function frame() {
+      scroll.current += (scroll.target - scroll.current) * scroll.ease;
+      speed += ((scroll.current - scroll.last) - speed) * 0.3;
+      scroll.last = scroll.current;
+      medias.forEach((m, i) => {
+        let an = (i - scroll.current) * ANGLE;
+        an = Math.atan2(Math.sin(an), Math.cos(an));
+        m.mesh.position.x = R * Math.sin(an);
+        m.mesh.position.z = R * Math.cos(an);
+        m.mesh.rotation.y = an;
+        m.program.uniforms.uActive.value = (Math.cos(an) + 1) * 0.5;
+        m.program.uniforms.uSpeed.value = speed;
+      });
+      const ci = ((Math.round(scroll.current) % N) + N) % N;
+      const proj = ring[ci].proj;
+      if (proj !== centerIdx) { centerIdx = proj; setInfo(proj); }
+      const rc = root.getBoundingClientRect();
+      let tt = ((rc.top + rc.height / 2) - window.innerHeight / 2) / (window.innerHeight / 2);
+      tt = Math.max(-1, Math.min(1, tt));
+      pivot.rotation.x = tt * (Math.PI / 18);
+      renderer.render({ scene, camera });
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   })();
 </script>
 </body>
