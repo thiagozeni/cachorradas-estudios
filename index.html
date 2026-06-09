@@ -663,9 +663,12 @@
   .cf-gl-stage.grabbing { cursor:grabbing; }
   .cf-gl-stage canvas { display:block; width:100%; height:100%; }
   .cf-gl-info {
-    position:absolute; left:0; right:0; top:1.4rem; transform:none;
-    width:100%; max-width:none; z-index:6; text-align:center; pointer-events:none;
+    position:static; width:100%; text-align:center; padding-bottom:1.1rem; pointer-events:none;
   }
+  .cf-gl-info > * { pointer-events:auto; }
+  /* durante o carregamento do coverflow: esconde o grid e reserva a altura (evita o flash do grid antigo) */
+  .videos-grid.cf-loading { display:block; position:relative; min-height:760px; background:none; border:none; }
+  .videos-grid.cf-loading > * { display:none; }
   .cf-gl-info > * { pointer-events:auto; }
   .cf-gl-info .cf-cat { font-family:var(--mono); font-size:.62rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--blue); display:block; margin-bottom:.6rem; }
   .cf-gl-info .cf-title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-style:italic; text-transform:uppercase; line-height:1.0; font-size:clamp(1.6rem,3.2vw,2.8rem); color:var(--white); margin-bottom:1.1rem; }
@@ -1658,9 +1661,11 @@
     const root = document.querySelector('.videos-grid');
     if (!root || window.innerWidth < 960) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    root.classList.add('cf-loading');                            // esconde o grid + reserva a altura no load
+    const abort = () => root.classList.remove('cf-loading');     // restaura o grid se algo falhar
     let OGL;
     try { OGL = await import('https://esm.sh/ogl@1.0.11'); }
-    catch (e) { console.warn('OGL falhou ao carregar', e); return; }
+    catch (e) { console.warn('OGL falhou ao carregar', e); abort(); return; }
     const { Renderer, Camera, Transform, Plane, Mesh, Program, Texture } = OGL;
 
     const cards = [...root.querySelectorAll('.vcard')];
@@ -1670,7 +1675,7 @@
       cat: c.querySelector('.vcard-cat')?.textContent.trim(),
       href: c.getAttribute('href'),
     })).filter((it) => it.src);
-    if (items.length < 2) return;
+    if (items.length < 2) { abort(); return; }
 
     const vertex = `
       attribute vec3 position; attribute vec2 uv;
@@ -1701,8 +1706,8 @@
     // cria o contexto WebGL ANTES de tocar no grid — se falhar, o grid original fica intacto
     let renderer, gl;
     try { renderer = new Renderer({ alpha: true, dpr: Math.min(devicePixelRatio, 2) }); gl = renderer.gl; }
-    catch (e) { return; }
-    if (!gl) return;
+    catch (e) { abort(); return; }
+    if (!gl) { abort(); return; }
 
     // pré-carrega as thumbnails; se QUALQUER uma falhar (CORS/404), mantém o grid intacto
     const loaded = await Promise.all(items.map((it) => new Promise((res) => {
@@ -1710,12 +1715,14 @@
       im.onload = () => res(im); im.onerror = () => res(null);
       im.src = it.src;
     })));
-    if (loaded.some((im) => !im)) return;
+    if (loaded.some((im) => !im)) { abort(); return; }
     items.forEach((it, i) => { it.img = loaded[i]; });
 
     // contexto + texturas OK → só agora assume o grid (substitui o conteúdo)
+    root.classList.remove('cf-loading');
     root.classList.add('cf-gl');
-    root.innerHTML = '<div class="cf-gl-stage"></div><div class="cf-gl-info"></div><div class="cf-gl-nav"></div><div class="cf-gl-thumbs"></div>';
+    // info ANTES do stage → caption vira cabeçalho acima do carrossel (sem sobrepor)
+    root.innerHTML = '<div class="cf-gl-info"></div><div class="cf-gl-stage"></div><div class="cf-gl-nav"></div><div class="cf-gl-thumbs"></div>';
     const stage = root.querySelector('.cf-gl-stage');
     const info = root.querySelector('.cf-gl-info');
     const navWrap = root.querySelector('.cf-gl-nav');
@@ -1724,7 +1731,6 @@
     const camera = new Camera(gl, { fov: 50 });
     camera.position.z = 5.5;
     const scene = new Transform();
-    scene.position.y = -0.31;   // desce o carrossel ~40px p/ liberar o caption do topo
     const pivot = new Transform();
     pivot.setParent(scene);
     const geometry = new Plane(gl, { widthSegments: 24, heightSegments: 1 });
