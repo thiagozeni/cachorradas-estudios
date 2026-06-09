@@ -666,7 +666,7 @@
     border:1px solid rgba(255,255,255,.08); background:var(--black3);
   }
   .arc-visual img { position:absolute; left:0; top:-10%; width:100%; height:120%; object-fit:cover; transition:transform .4s; }
-  .arc-visual::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 45%,rgba(10,10,10,.5)); }
+  .arc-visual::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(14,22,40,.22),rgba(10,12,20,.6)); }
   .arc-visual::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; z-index:2; }
   .arc-visual:hover img { transform:scale(1.04); }
   .arc-body { display:flex; flex-direction:column; gap:.7rem; }
@@ -696,13 +696,9 @@
   .arc-mix .arc-title { background:linear-gradient(90deg,var(--blue),var(--magenta)); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .arc-mix .arc-index { color:#9b6cff; }
 
-  /* duotone neon nas thumbnails reais → padroniza ao visual do site
-     (mix-blend-mode:luminosity sobre fundo colorido — não "tainteia" imagem cross-origin) */
-  .arc-visual { isolation:isolate; }
-  .arc-visual img { mix-blend-mode:luminosity; filter:contrast(1.25) brightness(0.92) saturate(1.1); }
-  .arc-blue .arc-visual { background:#0d4f8c; }
-  .arc-mag  .arc-visual { background:#8c1670; }
-  .arc-mix  .arc-visual { background:#4a2299; }
+  /* tratamento UNIFORME das thumbnails reais: dessaturado + escuro/frio (coeso, calmo;
+     a cor de cada série vive só nos acentos — linha do topo, índice, título) */
+  .arc-visual img { filter:grayscale(1) contrast(1.12) brightness(0.85); }
 
   @media (min-width:600px) { .section-universo { padding:3rem 2rem; } }
   @media (min-width:960px) {
@@ -954,7 +950,7 @@
 
     <article class="arc arc-blue">
       <a class="arc-visual" href="https://www.youtube.com/@CachorradasEstudios/search?query=metallica%20slayer" target="_blank" rel="noopener">
-        <img src="https://img.youtube.com/vi/zsWmrELZ26I/maxresdefault.jpg" alt="Metallica Slayer" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/zsWmrELZ26I/hqdefault.jpg'">
+        <img src="https://img.youtube.com/vi/zsWmrELZ26I/hq3.jpg" alt="Metallica Slayer" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/zsWmrELZ26I/hqdefault.jpg'">
       </a>
       <div class="arc-body">
         <div class="arc-index">01</div>
