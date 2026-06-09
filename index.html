@@ -696,6 +696,14 @@
   .arc-mix .arc-title { background:linear-gradient(90deg,var(--blue),var(--magenta)); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .arc-mix .arc-index { color:#9b6cff; }
 
+  /* duotone neon nas thumbnails reais → padroniza ao visual do site
+     (mix-blend-mode:luminosity sobre fundo colorido — não "tainteia" imagem cross-origin) */
+  .arc-visual { isolation:isolate; }
+  .arc-visual img { mix-blend-mode:luminosity; filter:contrast(1.25) brightness(0.92) saturate(1.1); }
+  .arc-blue .arc-visual { background:#0d4f8c; }
+  .arc-mag  .arc-visual { background:#8c1670; }
+  .arc-mix  .arc-visual { background:#4a2299; }
+
   @media (min-width:600px) { .section-universo { padding:3rem 2rem; } }
   @media (min-width:960px) {
     .section-universo { padding:5rem; }
